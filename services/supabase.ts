@@ -1,11 +1,38 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { Product, PriceHistory, Profile, Benefit } from '../types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Safely access environment variables
+const getEnvVar = (name: string): string => {
+  try {
+    // @ts-ignore - Vite specific
+    return import.meta.env[name] || '';
+  } catch (e) {
+    return '';
+  }
+};
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = getEnvVar('VITE_SUPABASE_URL');
+const SUPABASE_KEY = getEnvVar('VITE_SUPABASE_ANON_KEY');
+
+// Validation to prevent crash if URL is missing or invalid
+const isValidUrl = (url: string) => {
+  try {
+    return url && (url.startsWith('http://') || url.startsWith('https://'));
+  } catch {
+    return false;
+  }
+};
+
+// If missing, use placeholders so createClient doesn't throw immediate exception
+// This allows the React app to at least mount and show error states.
+export const supabase = createClient(
+  isValidUrl(SUPABASE_URL) ? SUPABASE_URL : 'https://placeholder-must-set-env-vars.supabase.co',
+  SUPABASE_KEY || 'placeholder-key'
+);
+
+if (!isValidUrl(SUPABASE_URL) || !SUPABASE_KEY) {
+  console.warn("⚠️ Supabase credentials are missing or invalid. Check your Vercel Environment Variables.");
+}
 
 export const getProducts = async (): Promise<Product[]> => {
   const { data, error } = await supabase.from('productos').select('*');

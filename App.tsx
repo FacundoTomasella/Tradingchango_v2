@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase, getProducts, getPriceHistory, getProfile, getConfig, getBenefits } from './services/supabase';
@@ -20,6 +19,7 @@ const App: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [benefits, setBenefits] = useState<Benefit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentTab, setCurrentTab] = useState<TabType>('home');
   const [searchTerm, setSearchTerm] = useState('');
   const [trendFilter, setTrendFilter] = useState<'up' | 'down' | null>(null);
@@ -51,7 +51,6 @@ const App: React.FC = () => {
           const prof = await getProfile(session.user.id);
           setProfile(prof);
           
-          // Show welcome message
           setWelcomeMsg(`¡Bienvenido, ${prof?.nombre || 'Trader'}!`);
           setTimeout(() => setWelcomeMsg(null), 4000);
 
@@ -66,8 +65,9 @@ const App: React.FC = () => {
         setBenefits(benefitData);
 
         setLoading(false);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to initialize app", err);
+        setError(err.message || "Error de conexión con la base de datos.");
         setLoading(false);
       }
     };
@@ -194,6 +194,24 @@ const App: React.FC = () => {
       <div className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-black">
         <div className="w-12 h-12 border-4 border-slate-200 border-t-green-500 rounded-full animate-spin"></div>
         <p className="mt-4 font-mono text-xs uppercase tracking-widest text-slate-500">Conectando a Mercado...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-black p-8 text-center">
+        <i className="fa-solid fa-triangle-exclamation text-red-500 text-5xl mb-6"></i>
+        <h2 className="text-2xl font-black mb-4">Error de Configuración</h2>
+        <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xs mb-8">
+          No se pudo conectar con Supabase. Asegurate de haber configurado las variables de entorno <b>VITE_SUPABASE_URL</b> y <b>VITE_SUPABASE_ANON_KEY</b> en el panel de Vercel.
+        </p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="bg-slate-900 dark:bg-white text-white dark:text-black px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest"
+        >
+          Reintentar
+        </button>
       </div>
     );
   }
