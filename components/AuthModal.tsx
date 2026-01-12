@@ -27,6 +27,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, profile, o
     if (view === 'membresias') getCatalogoMembresias().then(setCatalogo);
   }, [view]);
 
+  // Actualizar vista si cambia el usuario externamente
+  useEffect(() => {
+    if (user) setView('profile');
+    else setView('welcome');
+  }, [user]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -43,12 +49,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, profile, o
             subscription: 'free', membresias: [] 
           }]);
         }
-        alert("¡Cuenta creada! Iniciando sesión...");
+        alert("¡Cuenta creada! Ya podés ingresar.");
         setMode('login');
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        window.location.reload();
+        onClose(); // Cerramos el modal, App.tsx detectará el cambio
       }
     } catch (err: any) { alert(err.message); }
     setLoading(false);
@@ -63,7 +69,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, profile, o
     
     try {
       await updateMemberships(user.id, updated);
-      window.location.reload();
+      // No recargamos, dejamos que el estado fluya o se refresque mediante el componente padre si es necesario
     } catch (err) { alert("Error al actualizar membresías."); }
   };
 
@@ -116,7 +122,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, profile, o
                 <button onClick={() => setView('membresias')} className="p-2 border border-dashed border-slate-300 rounded-lg text-[10px] text-slate-400 font-bold">+ Agregar</button>
               </div>
             </div>
-            <button onClick={async () => { await supabase.auth.signOut(); onSignOut(); }} className="w-full text-red-500 font-bold py-2">Cerrar Sesión</button>
+            <button onClick={async () => { await supabase.auth.signOut(); onSignOut(); onClose(); }} className="w-full text-red-500 font-bold py-2">Cerrar Sesión</button>
           </div>
         )}
 

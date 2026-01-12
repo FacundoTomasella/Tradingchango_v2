@@ -26,49 +26,72 @@ const App: React.FC = () => {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [favorites, setFavorites] = useState<Record<number, number>>({});
-  const [welcomeMsg, setWelcomeMsg] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>(
     (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
   );
 
-  useEffect(() => {
-    const initApp = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const [prodData, histData, configData] = await Promise.all([
-          getProducts(),
-          getPriceHistory(7),
-          getConfig()
-        ]);
+  const loadData = useCallback(async (sessionUser: User | null) => {
+    try {
+      setLoading(true);
+      const [prodData, histData, configData] = await Promise.all([
+        getProducts(),
+        getPriceHistory(7),
+        getConfig()
+      ]);
 
-        setProducts(prodData || []);
-        setHistory(histData || []);
-        setConfig(configData || {});
-        setUser(session?.user || null);
+      setProducts(prodData || []);
+      setHistory(histData || []);
+      setConfig(configData || {});
 
-        if (session?.user) {
-          const prof = await getProfile(session.user.id);
-          setProfile(prof);
-          const savedFavs = localStorage.getItem(`favs_${session.user.id}`);
-          if (savedFavs) setFavorites(JSON.parse(savedFavs));
-        }
-
-        const day = new Date().getDay();
-        const benefitData = await getBenefits(day);
-        setBenefits(benefitData);
-        setLoading(false);
-      } catch (err: any) {
-        setError(err.message || "Error de conexión.");
-        setLoading(false);
+      if (sessionUser) {
+        const prof = await getProfile(sessionUser.id);
+        setProfile(prof);
+        const savedFavs = localStorage.getItem(`favs_${sessionUser.id}`);
+        if (savedFavs) setFavorites(JSON.parse(savedFavs));
       }
-    };
-    initApp();
+
+      const day = new Date().getDay();
+      const benefitData = await getBenefits(day);
+      setBenefits(benefitData);
+      setLoading(false);
+    } catch (err: any) {
+      console.error("Error loading app data:", err);
+      setError("No se pudieron cargar los productos. Verifique las políticas RLS en Supabase.");
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
+    // 1. Obtener sesión inicial
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const sessionUser = session?.user ?? null;
+      setUser(sessionUser);
+      loadData(sessionUser);
+    });
+
+    // 2. Escuchar cambios de autenticación (Login/Logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const sessionUser = session?.user ?? null;
+      setUser(sessionUser);
+      if (_event === 'SIGNED_IN') {
+        loadData(sessionUser);
+      } else if (_event === 'SIGNED_OUT') {
+        setProfile(null);
+        setFavorites({});
+        setProducts([]); // Opcional: Limpiar si quieres forzar login para ver
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [loadData]);
+
+  useEffect(() => {
     const root = window.document.documentElement;
-    if (theme === 'dark') root.classList.add('dark');
-    else root.classList.remove('dark');
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
     localStorage.setItem('theme', theme);
   }, [theme]);
 
@@ -100,12 +123,11 @@ const App: React.FC = () => {
       return { ...p, stats: getStats(prices, h7?.precio_minimo || 0), prices };
     });
 
-    // Fix: Redundant check currentTab !== 'home' removed as it's unreachable if currentTab is 'varios'
     if (currentTab === 'carnes') result = result.filter(p => p.categoria?.toLowerCase().includes('carne'));
     else if (currentTab === 'verdu') result = result.filter(p => p.categoria?.toLowerCase().includes('verdu') || p.categoria?.toLowerCase().includes('fruta'));
     else if (currentTab === 'varios') result = result.filter(p => !p.categoria?.toLowerCase().includes('carne') && !p.categoria?.toLowerCase().includes('verdu'));
     else if (currentTab === 'favs') result = result.filter(p => favorites[p.id]);
-    else if (currentTab !== 'home') result = []; // Don't show products for info views like about/terms/contact
+    else if (!['home'].includes(currentTab)) result = [];
 
     if (searchTerm) {
       const t = searchTerm.toLowerCase();
@@ -126,12 +148,12 @@ const App: React.FC = () => {
     });
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center dark:bg-black dark:text-white font-mono text-xs uppercase tracking-widest">Cargando mercado...</div>;
+  if (loading && products.length === 0) return <div className="min-h-screen flex items-center justify-center dark:bg-black dark:text-white font-mono text-xs uppercase tracking-widest">Cargando mercado...</div>;
 
   const isProductTab = ['home', 'carnes', 'verdu', 'varios', 'favs'].includes(currentTab);
 
   return (
-    <div className="max-w-screen-md mx-auto min-h-screen bg-white dark:bg-black shadow-2xl">
+    <div className="max-w-screen-md mx-auto min-h-screen bg-white dark:bg-black shadow-2xl transition-colors">
       <Header 
         searchTerm={searchTerm} setSearchTerm={setSearchTerm} 
         toggleTheme={toggleTheme} theme={theme}
@@ -141,7 +163,7 @@ const App: React.FC = () => {
         onNavigate={setCurrentTab}
       />
       <main className="pb-24">
-        {/* Render products view for main tabs */}
+        {error && <div className="p-4 bg-red-50 text-red-600 text-xs font-bold text-center border-b border-red-100">{error}</div>}
         {isProductTab ? (
           <>
             {currentTab === 'favs' && filteredProducts.length > 0 && <CartSummary items={filteredProducts} favorites={favorites} benefits={benefits} />}
@@ -151,10 +173,15 @@ const App: React.FC = () => {
               isCartView={currentTab === 'favs'} quantities={favorites}
               onUpdateQuantity={(id, d) => setFavorites(p => ({...p, [id]: Math.max(1, (p[id]||1)+d)}))}
             />
-            {filteredProducts.length === 0 && <div className="py-20 text-center text-slate-400 text-sm font-bold uppercase tracking-widest">No hay resultados</div>}
+            {!loading && filteredProducts.length === 0 && (
+              <div className="py-20 text-center flex flex-col items-center gap-4">
+                <i className="fa-solid fa-box-open text-4xl text-slate-200"></i>
+                <div className="text-slate-400 text-sm font-bold uppercase tracking-widest">No hay resultados</div>
+                {!user && <button onClick={() => setIsAuthOpen(true)} className="text-[10px] bg-slate-900 text-white px-4 py-2 rounded-lg font-black uppercase">Debes iniciar sesión</button>}
+              </div>
+            )}
           </>
         ) : (
-          /* Render info views for secondary tabs */
           <div className="animate-in fade-in duration-500">
             {currentTab === 'about' && <AboutView onClose={() => setCurrentTab('home')} content={config.about_content} />}
             {currentTab === 'terms' && <TermsView onClose={() => setCurrentTab('home')} content={config.terms_content} />}
@@ -164,7 +191,7 @@ const App: React.FC = () => {
       </main>
       <BottomNav currentTab={currentTab} setCurrentTab={setCurrentTab} cartCount={Object.keys(favorites).length} />
       {selectedProductId && <ProductDetail productId={selectedProductId} onClose={() => setSelectedProductId(null)} onFavoriteToggle={toggleFavorite} isFavorite={!!favorites[selectedProductId]} products={products} />}
-      {isAuthOpen && <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user} profile={profile} onSignOut={() => window.location.reload()} />}
+      {isAuthOpen && <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user} profile={profile} onSignOut={() => setUser(null)} />}
       <Footer />
     </div>
   );
