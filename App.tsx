@@ -67,10 +67,9 @@ const App: React.FC = () => {
         const prof = await getProfile(sessionUser.id);
         setProfile(prof);
         if (prof) {
-          // Bienvenido solo si es una nueva carga de perfil tras login
           const lastWelcome = sessionStorage.getItem('welcome_shown');
           if (lastWelcome !== sessionUser.id) {
-            alert(`¡Bienvenido de nuevo, ${prof.nombre || 'Trader'}!`);
+            alert(`¡Bienvenido, ${prof.nombre || 'Trader'}!`);
             sessionStorage.setItem('welcome_shown', sessionUser.id);
           }
         }
@@ -83,8 +82,7 @@ const App: React.FC = () => {
       setBenefits(benefitData);
       setLoading(false);
     } catch (err: any) {
-      console.error("Error loading app data:", err);
-      setError("No se pudieron cargar los productos.");
+      setError("Error al conectar con el mercado.");
       setLoading(false);
     }
   }, []);
@@ -99,15 +97,13 @@ const App: React.FC = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const sessionUser = session?.user ?? null;
       setUser(sessionUser);
-      if (_event === 'SIGNED_IN') {
-        loadData(sessionUser);
-      } else if (_event === 'SIGNED_OUT') {
+      if (_event === 'SIGNED_IN') loadData(sessionUser);
+      else if (_event === 'SIGNED_OUT') {
         setProfile(null);
         setFavorites({});
         sessionStorage.removeItem('welcome_shown');
       }
     });
-
     return () => subscription.unsubscribe();
   }, [loadData]);
 
@@ -119,9 +115,7 @@ const App: React.FC = () => {
   }, [theme]);
 
   useEffect(() => {
-    if (user) {
-      localStorage.setItem(`favs_${user.id}`, JSON.stringify(favorites));
-    }
+    if (user) localStorage.setItem(`favs_${user.id}`, JSON.stringify(favorites));
   }, [favorites, user]);
 
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
@@ -159,7 +153,6 @@ const App: React.FC = () => {
     if (trendFilter && currentTab !== 'favs') {
       result = result.filter(p => trendFilter === 'up' ? p.stats.isUp : p.stats.isDown);
     }
-    
     return result;
   }, [products, history, currentTab, searchTerm, trendFilter, favorites]);
 
@@ -182,7 +175,7 @@ const App: React.FC = () => {
     });
   };
 
-  if (loading && products.length === 0) return <div className="min-h-screen flex items-center justify-center dark:bg-black dark:text-white font-mono text-xs uppercase tracking-widest animate-pulse">Cargando mercado...</div>;
+  if (loading && products.length === 0) return <div className="min-h-screen flex items-center justify-center dark:bg-black dark:text-white font-mono text-xs uppercase tracking-widest animate-pulse">Analizando mercado...</div>;
 
   const isProductTab = ['home', 'carnes', 'verdu', 'varios', 'favs'].includes(currentTab);
 
@@ -195,11 +188,10 @@ const App: React.FC = () => {
         subscription={profile?.subscription} trendFilter={trendFilter}
         setTrendFilter={setTrendFilter} 
         showHero={currentTab === 'home' && !searchTerm && !trendFilter}
-        onNavigate={navigate}
-        currentTab={currentTab}
+        onNavigate={navigate} currentTab={currentTab}
       />
-      <main className="pb-16">
-        {error && <div className="p-4 bg-red-50 text-red-600 text-xs font-bold text-center border-b border-red-100">{error}</div>}
+      <main className="pb-20">
+        {error && <div className="p-4 bg-red-50 text-red-600 text-xs font-bold text-center">{error}</div>}
         {isProductTab ? (
           <>
             {currentTab === 'favs' && filteredProducts.length > 0 && <CartSummary items={filteredProducts} favorites={favorites} benefits={benefits} />}
@@ -211,13 +203,13 @@ const App: React.FC = () => {
               onUpdateQuantity={(id, d) => setFavorites(p => ({...p, [id]: Math.max(1, (p[id]||1)+d)}))}
             />
             {!loading && filteredProducts.length === 0 && (
-              <div className="py-20 text-center flex flex-col items-center gap-4 animate-in fade-in duration-700 px-8">
+              <div className="py-20 text-center flex flex-col items-center gap-4 px-8">
                 <i className="fa-solid fa-box-open text-6xl text-slate-100 dark:text-slate-900"></i>
                 <div className="text-black dark:text-white text-sm font-black uppercase tracking-widest">
                   {currentTab === 'favs' ? 'Tu chango está vacío' : 'No se encontraron resultados'}
                 </div>
                 <p className="text-slate-400 text-xs font-medium">
-                  {currentTab === 'favs' ? 'Agregá productos para comparar el total en los distintos supermercados.' : 'Probá con otros términos o filtros.'}
+                  {currentTab === 'favs' ? 'Agregá productos para comparar el total.' : 'Probá con otros términos.'}
                 </p>
               </div>
             )}
