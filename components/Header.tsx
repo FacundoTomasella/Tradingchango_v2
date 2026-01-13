@@ -33,7 +33,6 @@ const Header: React.FC<HeaderProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -56,72 +55,64 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   const getUserIconColor = () => {
-    if (!user) return 'text-slate-900 dark:text-white';
+    if (!user) return 'text-black dark:text-white';
     if (subscription === 'pro' || subscription === 'premium') return 'text-amber-500';
     return 'text-green-500';
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4">
+    <header className="sticky top-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 p-4">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => onNavigate('home')}>
-          <div className="relative flex items-center justify-center h-6 w-8">
-            <i className="fa-solid fa-cart-shopping text-lg text-slate-900 dark:text-white"></i>
-            <i className="fa-solid fa-arrow-trend-up text-[10px] text-green-500 absolute -top-1 -right-0.5 bg-white dark:bg-black rounded-full p-0.5"></i>
+          <div className="relative flex items-center justify-center h-10 w-10">
+            <i className="fa-solid fa-cart-shopping text-2xl text-black dark:text-white"></i>
+            <i className="fa-solid fa-arrow-trend-up text-xs text-green-500 absolute -top-1 -right-1 bg-white dark:bg-black rounded-full p-0.5"></i>
           </div>
-          <span className="font-extrabold text-xl tracking-tighter text-slate-900 dark:text-white">TradingChango</span>
+          <span className="font-extrabold text-2xl tracking-tighter text-black dark:text-white">TradingChango</span>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4">
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-4 mr-2 border-r border-slate-200 dark:border-slate-800 pr-4">
+        <div className="flex items-center gap-3">
+          <nav className="hidden md:flex items-center gap-6 mr-4 border-r border-slate-200 dark:border-slate-800 pr-6">
             {navItems.map(item => (
               <button 
                 key={item.id}
                 onClick={() => handleNav(item.id)}
-                className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                className="text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-black dark:hover:text-white transition-colors"
               >
                 {item.label}
               </button>
             ))}
           </nav>
 
-          {/* Mobile Nav Dropdown */}
           <div className="relative md:hidden" ref={menuRef}>
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400"
             >
-              <i className={`fa-solid ${isMenuOpen ? 'fa-xmark' : 'fa-ellipsis-vertical'} text-lg`}></i>
+              <i className={`fa-solid ${isMenuOpen ? 'fa-xmark' : 'fa-circle-info'} text-xl`}></i>
             </button>
             
             {isMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-900 rounded-2xl shadow-2xl p-2 animate-in fade-in zoom-in-95 duration-200">
+              <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-black border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-2 animate-in fade-in zoom-in-95 duration-200 z-50">
                 {navItems.map(item => (
                   <button 
                     key={item.id}
                     onClick={() => handleNav(item.id)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 text-left transition-colors"
+                    className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 text-left transition-colors"
                   >
-                    <i className={`fa-solid ${item.icon} text-slate-400 w-4`}></i>
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{item.label}</span>
+                    <i className={`fa-solid ${item.icon} text-slate-400 w-5`}></i>
+                    <span className="text-xs font-black text-black dark:text-white uppercase tracking-widest">{item.label}</span>
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            <button 
-              onClick={onUserClick}
-              className={`w-10 h-10 flex items-center justify-center text-xl transition-colors ${getUserIconColor()}`}
-            >
+          <div className="flex items-center gap-3">
+            <button onClick={onUserClick} className={`w-10 h-10 flex items-center justify-center text-2xl transition-all ${getUserIconColor()}`}>
               <i className="fa-solid fa-circle-user"></i>
             </button>
-            <button 
-              onClick={toggleTheme} 
-              className="w-10 h-10 flex items-center justify-center text-xl text-slate-900 dark:text-white hover:scale-110 transition-transform"
-            >
+            <button onClick={toggleTheme} className="w-10 h-10 flex items-center justify-center text-2xl text-black dark:text-white hover:scale-110 transition-transform">
               <i className={`fa-solid ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`}></i>
             </button>
           </div>
@@ -135,23 +126,15 @@ const Header: React.FC<HeaderProps> = ({
           placeholder="BUSCAR PRODUCTO..." 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-3 pl-11 pr-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white transition-all"
+          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-4 pl-12 pr-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all text-black dark:text-white"
         />
-        {searchTerm && (
-          <button 
-            onClick={() => setSearchTerm('')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-          >
-            <i className="fa-solid fa-circle-xmark"></i>
-          </button>
-        )}
       </div>
 
       {currentTab !== 'favs' && (
         <div className="flex gap-2 animate-in fade-in duration-300">
           <button 
             onClick={() => setTrendFilter(trendFilter === 'down' ? null : 'down')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border ${
               trendFilter === 'down' 
                 ? 'bg-green-500 text-white border-green-500' 
                 : 'bg-white dark:bg-black text-green-500 border-slate-200 dark:border-slate-800'
@@ -161,7 +144,7 @@ const Header: React.FC<HeaderProps> = ({
           </button>
           <button 
             onClick={() => setTrendFilter(trendFilter === 'up' ? null : 'up')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border ${
               trendFilter === 'up' 
                 ? 'bg-red-500 text-white border-red-500' 
                 : 'bg-white dark:bg-black text-red-500 border-slate-200 dark:border-slate-800'
@@ -174,8 +157,8 @@ const Header: React.FC<HeaderProps> = ({
 
       {showHero && (
         <div className="mt-8 text-center px-4 animate-in fade-in slide-in-from-top-4 duration-500">
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white leading-none tracking-tight">Los precios del super como nunca los viste</h2>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 font-medium">Analizá tendencias y compará antes de comprar</p>
+          <h2 className="text-2xl font-black text-black dark:text-white leading-none tracking-tighter">Los precios del super como nunca los viste</h2>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 font-medium tracking-tight">Analizá tendencias y compará antes de comprar</p>
         </div>
       )}
     </header>

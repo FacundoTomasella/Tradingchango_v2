@@ -16,6 +16,12 @@
               sans: ['Inter', 'sans-serif'],
               mono: ['Roboto Mono', 'monospace'],
             },
+            colors: {
+              slate: {
+                900: '#000000',
+                100: '#ffffff'
+              }
+            }
           }
         }
       }
@@ -24,6 +30,8 @@
         body {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            background-color: white;
+            color: black;
         }
         .dark body {
             background-color: black;
@@ -32,6 +40,8 @@
         * {
             transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
     </style>
 <script type="importmap">
 {
@@ -47,7 +57,7 @@
 }
 </script>
 </head>
-<body class="bg-white dark:bg-black text-slate-900 dark:text-slate-100">
+<body class="bg-white dark:bg-black text-black dark:text-white">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
 </body>

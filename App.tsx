@@ -30,6 +30,26 @@ const App: React.FC = () => {
     (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
   );
 
+  // Deep Linking Handler
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash.startsWith('product/')) {
+        setSelectedProductId(parseInt(hash.split('/')[1]));
+      } else if (['home', 'carnes', 'verdu', 'varios', 'favs', 'about', 'terms', 'contact'].includes(hash)) {
+        setCurrentTab(hash as TabType);
+        setSelectedProductId(null);
+      }
+    };
+    window.addEventListener('hashchange', handleHash);
+    handleHash();
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
+  const navigate = (tab: TabType) => {
+    window.location.hash = tab;
+  };
+
   const loadData = useCallback(async (sessionUser: User | null) => {
     try {
       setLoading(true);
@@ -46,6 +66,14 @@ const App: React.FC = () => {
       if (sessionUser) {
         const prof = await getProfile(sessionUser.id);
         setProfile(prof);
+        if (prof) {
+          // Bienvenido solo si es una nueva carga de perfil tras login
+          const lastWelcome = sessionStorage.getItem('welcome_shown');
+          if (lastWelcome !== sessionUser.id) {
+            alert(`¡Bienvenido de nuevo, ${prof.nombre || 'Trader'}!`);
+            sessionStorage.setItem('welcome_shown', sessionUser.id);
+          }
+        }
         const savedFavs = localStorage.getItem(`favs_${sessionUser.id}`);
         if (savedFavs) setFavorites(JSON.parse(savedFavs));
       }
@@ -56,7 +84,7 @@ const App: React.FC = () => {
       setLoading(false);
     } catch (err: any) {
       console.error("Error loading app data:", err);
-      setError("No se pudieron cargar los productos. Verifique las políticas RLS en Supabase.");
+      setError("No se pudieron cargar los productos.");
       setLoading(false);
     }
   }, []);
@@ -76,6 +104,7 @@ const App: React.FC = () => {
       } else if (_event === 'SIGNED_OUT') {
         setProfile(null);
         setFavorites({});
+        sessionStorage.removeItem('welcome_shown');
       }
     });
 
@@ -84,11 +113,8 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const root = window.document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    if (theme === 'dark') root.classList.add('dark');
+    else root.classList.remove('dark');
     localStorage.setItem('theme', theme);
   }, [theme]);
 
@@ -124,11 +150,10 @@ const App: React.FC = () => {
     else if (currentTab === 'verdu') result = result.filter(p => p.categoria?.toLowerCase().includes('verdu') || p.categoria?.toLowerCase().includes('fruta'));
     else if (currentTab === 'varios') result = result.filter(p => !p.categoria?.toLowerCase().includes('carne') && !p.categoria?.toLowerCase().includes('verdu'));
     else if (currentTab === 'favs') result = result.filter(p => favorites[p.id]);
-    else if (!['home'].includes(currentTab)) result = [];
 
     if (searchTerm) {
       const t = searchTerm.toLowerCase();
-      result = result.filter(p => p.nombre.toLowerCase().includes(t) || p.ticker?.toLowerCase().includes(t));
+      result = result.filter(p => p.nombre.toLowerCase().includes(t) || (p.ticker && p.ticker.toLowerCase().includes(t)));
     }
     
     if (trendFilter && currentTab !== 'favs') {
@@ -140,9 +165,7 @@ const App: React.FC = () => {
 
   const toggleFavorite = (id: number) => {
     if (!user) { setIsAuthOpen(true); return; }
-    
     const isFav = !!favorites[id];
-    // Por ahora todos son PRO, pero dejamos la lógica lista para cuando habilites FREE
     const isPro = profile?.subscription === 'pro' || profile?.subscription === 'premium';
     const favCount = Object.keys(favorites).length;
 
@@ -170,43 +193,52 @@ const App: React.FC = () => {
         toggleTheme={toggleTheme} theme={theme}
         onUserClick={() => setIsAuthOpen(true)} user={user}
         subscription={profile?.subscription} trendFilter={trendFilter}
-        setTrendFilter={setTrendFilter} showHero={currentTab === 'home' && !searchTerm}
-        onNavigate={setCurrentTab}
+        setTrendFilter={setTrendFilter} 
+        showHero={currentTab === 'home' && !searchTerm && !trendFilter}
+        onNavigate={navigate}
         currentTab={currentTab}
       />
-      <main className="pb-24">
+      <main className="pb-16">
         {error && <div className="p-4 bg-red-50 text-red-600 text-xs font-bold text-center border-b border-red-100">{error}</div>}
         {isProductTab ? (
           <>
             {currentTab === 'favs' && filteredProducts.length > 0 && <CartSummary items={filteredProducts} favorites={favorites} benefits={benefits} />}
             <ProductList 
-              products={filteredProducts as any} onProductClick={setSelectedProductId}
+              products={filteredProducts as any} 
+              onProductClick={(id) => window.location.hash = `product/${id}`}
               onFavoriteToggle={toggleFavorite} isFavorite={id => !!favorites[id]}
               isCartView={currentTab === 'favs'} quantities={favorites}
               onUpdateQuantity={(id, d) => setFavorites(p => ({...p, [id]: Math.max(1, (p[id]||1)+d)}))}
             />
             {!loading && filteredProducts.length === 0 && (
-              <div className="py-20 text-center flex flex-col items-center gap-4 animate-in fade-in duration-700">
+              <div className="py-20 text-center flex flex-col items-center gap-4 animate-in fade-in duration-700 px-8">
                 <i className="fa-solid fa-box-open text-6xl text-slate-100 dark:text-slate-900"></i>
-                <div className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">El Chango está vacío</div>
-                {!user && (
-                  <button onClick={() => setIsAuthOpen(true)} className="mt-4 px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-black rounded-xl text-xs font-bold uppercase tracking-widest active:scale-95 transition-transform">
-                    Ingresar para comprar
-                  </button>
-                )}
+                <div className="text-black dark:text-white text-sm font-black uppercase tracking-widest">
+                  {currentTab === 'favs' ? 'Tu chango está vacío' : 'No se encontraron resultados'}
+                </div>
+                <p className="text-slate-400 text-xs font-medium">
+                  {currentTab === 'favs' ? 'Agregá productos para comparar el total en los distintos supermercados.' : 'Probá con otros términos o filtros.'}
+                </p>
               </div>
             )}
           </>
         ) : (
           <div className="animate-in fade-in duration-500">
-            {currentTab === 'about' && <AboutView onClose={() => setCurrentTab('home')} content={config.about_content} />}
-            {currentTab === 'terms' && <TermsView onClose={() => setCurrentTab('home')} content={config.terms_content} />}
-            {currentTab === 'contact' && <ContactView onClose={() => setCurrentTab('home')} content={config.contact_content} email={config.contact_email} />}
+            {currentTab === 'about' && <AboutView onClose={() => navigate('home')} content={config.about_content} />}
+            {currentTab === 'terms' && <TermsView onClose={() => navigate('home')} content={config.terms_content} />}
+            {currentTab === 'contact' && <ContactView onClose={() => navigate('home')} content={config.contact_content} email={config.contact_email} />}
           </div>
         )}
       </main>
-      <BottomNav currentTab={currentTab} setCurrentTab={setCurrentTab} cartCount={Object.keys(favorites).length} />
-      {selectedProductId && <ProductDetail productId={selectedProductId} onClose={() => setSelectedProductId(null)} onFavoriteToggle={toggleFavorite} isFavorite={!!favorites[selectedProductId]} products={products} />}
+      <BottomNav currentTab={currentTab} setCurrentTab={navigate} cartCount={Object.keys(favorites).length} />
+      {selectedProductId && (
+        <ProductDetail 
+          productId={selectedProductId} 
+          onClose={() => { setSelectedProductId(null); window.location.hash = currentTab; }} 
+          onFavoriteToggle={toggleFavorite} isFavorite={!!favorites[selectedProductId]} products={products} 
+          theme={theme}
+        />
+      )}
       {isAuthOpen && <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} user={user} profile={profile} onSignOut={() => setUser(null)} />}
       <Footer />
     </div>
