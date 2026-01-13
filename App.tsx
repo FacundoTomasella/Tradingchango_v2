@@ -32,8 +32,37 @@ const App: React.FC = () => {
     (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
   );
 
-  useEffect(() => { // 1. Configuración del Tema al cargar const savedTheme = localStorage.getItem('theme'); const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) { document.documentElement.classList.add('dark'); } else { document.documentElement.classList.remove('dark'); } // 2. Manejo de Navegación por Hash const handleHash = () => { const hash = window.location.hash.replace('#', ''); if (hash.startsWith('product/')) { const id = parseInt(hash.split('/')[1]); if (!isNaN(id)) setSelectedProductId(id); } else if (['about', 'terms', 'contact', 'home', 'carnes', 'verdu', 'varios', 'favs'].includes(hash)) { setCurrentTab(hash as TabType); setSelectedProductId(null); } else if (!hash) { window.location.hash = 'home'; } }; window.addEventListener('hashchange', handleHash); handleHash(); return () => window.removeEventListener('hashchange', handleHash); }, []); // <--- Revisá que este cierre de paréntesis y llave esté así
+  // Bloque solicitado: Configuración inicial de Tema y Navegación
+  useEffect(() => {
+    // 1. Configuración del Tema al cargar
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+      document.documentElement.classList.add('dark');
+      setTheme('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      setTheme('light');
+    }
 
+    // 2. Manejo de Navegación por Hash
+    const handleHash = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash.startsWith('product/')) {
+        const id = parseInt(hash.split('/')[1]);
+        if (!isNaN(id)) setSelectedProductId(id);
+      } else if (['about', 'terms', 'contact', 'home', 'carnes', 'verdu', 'varios', 'favs'].includes(hash)) {
+        setCurrentTab(hash as TabType);
+        setSelectedProductId(null);
+      } else if (!hash) {
+        window.location.hash = 'home';
+      }
+    };
+
+    window.addEventListener('hashchange', handleHash);
+    handleHash();
+
+    // 3. PWA Install Logic (Integrado en el mismo effect de inicialización)
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -44,11 +73,22 @@ const App: React.FC = () => {
       }
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
     return () => {
       window.removeEventListener('hashchange', handleHash);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
+
+  // Sincronizar el DOM cuando el estado de theme cambia manualmente
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
@@ -120,7 +160,7 @@ const App: React.FC = () => {
     }
   }, [favorites, user]);
 
-  const toggleTheme = () => { const newTheme = theme === 'light' ? 'dark' : 'light'; // Calculamos el nuevo estado setTheme(newTheme); // Actualizamos React // 1. Guardamos en el navegador para la próxima visita localStorage.setItem('theme', newTheme); // 2. Aplicamos el cambio visual al HTML para que Tailwind/CSS reaccione if (newTheme === 'dark') { document.documentElement.classList.add('dark'); } else { document.documentElement.classList.remove('dark'); } };
+  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   const getStats = (p: number[], h: number): ProductStats => {
     const v = p.filter(x => x > 0);
