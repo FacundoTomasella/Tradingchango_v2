@@ -53,11 +53,11 @@ const ProductList: React.FC<ProductListProps> = ({
   if (products.length === 0 && searchTerm) {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-10 text-center animate-in fade-in zoom-in duration-500">
-        <div className="w-20 h-20 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] flex items-center justify-center text-slate-300 mb-6 text-3xl">
+        <div className="w-20 h-20 bg-neutral-50 dark:bg-neutral-900/50 rounded-[2rem] flex items-center justify-center text-neutral-300 mb-6 text-3xl">
           <i className="fa-solid fa-magnifying-glass"></i>
         </div>
-        <h3 className="text-lg font-black text-slate-900 dark:text-white mb-2 uppercase tracking-tighter">No se encontraron productos</h3>
-        <p className="text-sm text-slate-400 font-medium leading-relaxed">Probá buscando con otras palabras o navegando por categorías.</p>
+        <h3 className="text-lg font-black text-neutral-900 dark:text-white mb-2 uppercase tracking-tighter">No se encontraron productos</h3>
+        <p className="text-sm text-neutral-400 font-medium leading-relaxed">Probá buscando con otras palabras o navegando por categorías.</p>
       </div>
     );
   }
@@ -65,11 +65,11 @@ const ProductList: React.FC<ProductListProps> = ({
   if (products.length === 0 && isCartView) {
     return (
       <div className="flex flex-col items-center justify-center py-32 px-10 text-center animate-in fade-in zoom-in duration-700">
-        <div className="w-24 h-24 bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] flex items-center justify-center text-slate-300 mb-8 text-4xl">
+        <div className="w-24 h-24 bg-neutral-50 dark:bg-neutral-900/50 rounded-[2.5rem] flex items-center justify-center text-neutral-300 mb-8 text-4xl">
           <i className="fa-solid fa-cart-shopping"></i>
         </div>
-        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-4 uppercase tracking-tighter">Tu chango está vacío</h3>
-        <p className="text-sm text-slate-400 font-medium leading-relaxed max-w-[280px]">
+        <h3 className="text-xl font-black text-neutral-900 dark:text-white mb-4 uppercase tracking-tighter">Tu chango está vacío</h3>
+        <p className="text-sm text-neutral-400 font-medium leading-relaxed max-w-[280px]">
           Agregá productos para comparar el total en los distintos supermercados y maximizar tu ahorro.
         </p>
       </div>
@@ -87,7 +87,7 @@ const ProductList: React.FC<ProductListProps> = ({
           <div 
             key={p.id} 
             onClick={() => onProductClick(p.id)}
-            className="flex items-center justify-between px-[20px] py-[18px] bg-[#ffffff] dark:bg-[#000000] hover:bg-bg-card-light dark:hover:bg-bg-card-dark cursor-pointer transition-colors"
+            className="flex items-center justify-between px-[20px] py-[18px] bg-[#ffffff] dark:bg-[#000000] hover:bg-neutral-50 dark:hover:bg-neutral-900/30 cursor-pointer transition-colors"
           >
             <div className="flex-1 flex items-center justify-between pr-4">
               <div className="flex flex-col gap-0.5">
@@ -101,7 +101,7 @@ const ProductList: React.FC<ProductListProps> = ({
                     </span>
                   ))}
                 </div>
-                <span className="text-[13px] md:text-[14px] font-medium text-muted dark:text-muted-dark line-clamp-1 font-sans">
+                <span className="text-[13px] md:text-[14px] font-medium text-neutral-500 dark:text-neutral-400 line-clamp-1 font-sans">
                   {p.nombre}
                 </span>
               </div>
@@ -119,12 +119,12 @@ const ProductList: React.FC<ProductListProps> = ({
             <div className="flex items-center gap-4">
               {isCartView && onUpdateQuantity && (
                 <div 
-                  className="flex items-center gap-3 bg-bg-card-light dark:bg-bg-card-dark px-2 py-1.5 rounded-lg border border-border-light dark:border-border-dark"
+                  className="flex items-center gap-3 bg-neutral-100 dark:bg-neutral-900 px-2 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <button onClick={() => onUpdateQuantity(p.id, -1)} className="text-muted dark:text-muted-dark hover:text-primary dark:hover:text-white px-2 font-black text-base">-</button>
-                  <span className="font-mono text-sm font-black min-w-[20px] text-center text-primary dark:text-[#ffffff]">{qty}</span>
-                  <button onClick={() => onUpdateQuantity(p.id, 1)} className="text-muted dark:text-muted-dark hover:text-primary dark:hover:text-white px-2 font-black text-base">+</button>
+                  <button onClick={() => onUpdateQuantity(p.id, -1)} className="text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white px-2 font-black text-base">-</button>
+                  <span className="font-mono text-sm font-black min-w-[20px] text-center text-black dark:text-white">{qty}</span>
+                  <button onClick={() => onUpdateQuantity(p.id, 1)} className="text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white px-2 font-black text-base">+</button>
                 </div>
               )}
               
@@ -133,7 +133,7 @@ const ProductList: React.FC<ProductListProps> = ({
                   e.stopPropagation();
                   onFavoriteToggle(p.id);
                 }}
-                className={`transition-all flex items-center justify-center active:scale-90 p-2 ${fav ? 'text-star-gold' : 'text-slate-300'}`}
+                className={`transition-all flex items-center justify-center active:scale-90 p-2 ${fav ? 'text-star-gold' : 'text-neutral-300'}`}
               >
                 <i className="fa-solid fa-cart-shopping text-[20px]"></i>
               </button>

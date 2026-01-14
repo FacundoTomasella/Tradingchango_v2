@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { Product, Benefit, UserMembership } from '../types';
 
@@ -81,12 +80,12 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
   if (results.length === 0) {
     return (
       <div className="p-4 animate-in fade-in duration-700">
-        <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-[2rem] p-6 shadow-xl text-center">
-          <div className="w-12 h-12 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
+        <div className="bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-[2rem] p-6 shadow-xl text-center">
+          <div className="w-12 h-12 bg-neutral-50 dark:bg-neutral-900 rounded-full flex items-center justify-center mx-auto mb-3 text-neutral-400">
             <i className="fa-solid fa-circle-exclamation text-xl"></i>
           </div>
-          <h3 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-1">Chango Incompleto</h3>
-          <p className="text-[10px] text-slate-400 font-medium">Ningún supermercado tiene stock de todos los productos de tu lista.</p>
+          <h3 className="text-[11px] font-black text-black dark:text-white uppercase tracking-widest mb-1">Chango Incompleto</h3>
+          <p className="text-[10px] text-neutral-400 font-medium">Ningún supermercado tiene stock de todos los productos de tu lista.</p>
         </div>
       </div>
     );
@@ -120,7 +119,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
 
   return (
     <div className="p-4 space-y-3 animate-in fade-in duration-700">
-      <div className="bg-white dark:bg-slate-950 border border-green-500/30 rounded-[1.5rem] p-6 shadow-lg shadow-green-500/5 relative overflow-hidden">
+      <div className="bg-white dark:bg-black border border-green-500/30 rounded-[1.5rem] p-6 shadow-lg shadow-green-500/5 relative overflow-hidden">
         <div className="absolute -top-4 -right-4 text-green-500/10 text-6xl rotate-12 pointer-events-none">
           <i className="fa-solid fa-trophy"></i>
         </div>
@@ -132,12 +131,12 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
                 <i className="fa-solid fa-trophy text-green-500 text-[10px]"></i>
                 <span className="text-[10px] font-black uppercase text-green-500 tracking-[0.2em]">Mejor Opción</span>
               </div>
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-none">{best.name}</h2>
+              <h2 className="text-2xl font-black text-black dark:text-white uppercase tracking-tighter leading-none">{best.name}</h2>
             </div>
             
             <div className="text-right">
-              <span className="text-[10px] font-black uppercase text-slate-400 tracking-[0.1em] block mb-1">Pagas en total*</span>
-              <div className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter font-mono">${format(Math.round(best.totalChango))}</div>
+              <span className="text-[10px] font-black uppercase text-neutral-400 tracking-[0.1em] block mb-1">Pagas en total*</span>
+              <div className="text-4xl font-black text-black dark:text-white tracking-tighter font-mono">${format(Math.round(best.totalChango))}</div>
             </div>
           </div>
 
@@ -147,24 +146,24 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
               <span className="text-sm font-black text-green-600 dark:text-green-400 font-mono">${format(Math.round(potentialSavings))}</span>
             </div>
             
-            <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-tight ml-auto">
-              <div>Subtotal: <span className="font-mono text-slate-600 dark:text-slate-300 font-bold">${format(Math.round(best.subtotal))}</span></div>
+            <div className="flex items-center gap-4 text-[10px] font-bold text-neutral-400 uppercase tracking-tight ml-auto">
+              <div>Subtotal: <span className="font-mono text-neutral-600 dark:text-neutral-300 font-bold">${format(Math.round(best.subtotal))}</span></div>
               <div>Descuentos: <span className="font-mono text-green-500 font-bold">-${format(Math.round(best.gondolaDiscount))}</span></div>
             </div>
           </div>
 
           {(paymentAdvice?.owned || paymentAdvice?.recommend) && (
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-4 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-4 border-t border-neutral-100 dark:border-neutral-800">
               {paymentAdvice.owned && (
-                <div className="flex-shrink-0 flex items-center gap-2 bg-slate-900 dark:bg-white px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800">
+                <div className="flex-shrink-0 flex items-center gap-2 bg-black dark:bg-white px-3 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-800">
                   <i className="fa-solid fa-id-card text-[10px] text-white dark:text-black"></i>
                   <span className="text-[9px] font-bold text-white dark:text-black uppercase tracking-tight">Pagá con {paymentAdvice.owned.entidad_nombre}</span>
                 </div>
               )}
               {paymentAdvice.recommend && (
-                <a href={paymentAdvice.recommend.link_referido} target="_blank" rel="noopener noreferrer" className="flex-shrink-0 flex items-center gap-2 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-full border border-slate-900 dark:border-white">
-                  <i className="fa-solid fa-link text-[10px] text-slate-900 dark:text-white"></i>
-                  <span className="text-[9px] font-bold text-slate-900 dark:text-white uppercase tracking-tight">Vincular {paymentAdvice.recommend.entidad_nombre}</span>
+                <a href={paymentAdvice.recommend.link_referido} target="_blank" rel="noopener noreferrer" className="flex-shrink-0 flex items-center gap-2 bg-white dark:bg-neutral-900 px-3 py-1.5 rounded-full border border-black dark:border-white">
+                  <i className="fa-solid fa-link text-[10px] text-black dark:text-white"></i>
+                  <span className="text-[9px] font-bold text-black dark:text-white uppercase tracking-tight">Vincular {paymentAdvice.recommend.entidad_nombre}</span>
                 </a>
               )}
             </div>
@@ -176,7 +175,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
         <div className="px-2">
           <button 
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] py-3 hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="w-full flex items-center justify-between text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] py-3 hover:text-black dark:hover:text-white transition-colors"
           >
             <span>Ver otros mercados ({others.length})</span>
             <i className={`fa-solid fa-chevron-${isExpanded ? 'up' : 'down'} transition-transform text-[8px]`}></i>
@@ -185,11 +184,11 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
           {isExpanded && (
             <div className="mt-2 space-y-1 animate-in slide-in-from-top-2 duration-300">
               {others.map((store) => (
-                <div key={store.name} className="flex justify-between items-center py-3 px-5 bg-slate-50 dark:bg-slate-900/30 rounded-xl border border-slate-100 dark:border-slate-800">
-                  <span className="text-[11px] font-black text-slate-500 uppercase tracking-tight">{store.name}</span>
+                <div key={store.name} className="flex justify-between items-center py-3 px-5 bg-neutral-50 dark:bg-neutral-900/30 rounded-xl border border-neutral-100 dark:border-neutral-800">
+                  <span className="text-[11px] font-black text-neutral-500 uppercase tracking-tight">{store.name}</span>
                   <div className="flex items-center gap-4">
                     <span className="text-[10px] font-bold text-red-500 font-mono">+${format(Math.round(store.totalChango - best.totalChango))}</span>
-                    <span className="font-mono text-[13px] font-black text-slate-900 dark:text-white">${format(Math.round(store.totalChango))}</span>
+                    <span className="font-mono text-[13px] font-black text-black dark:text-white">${format(Math.round(store.totalChango))}</span>
                   </div>
                 </div>
               ))}
@@ -198,7 +197,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
         </div>
       )}
 
-      <p className="text-[9px] text-center text-slate-400 font-bold tracking-tight py-2 px-4 leading-relaxed uppercase">
+      <p className="text-[9px] text-center text-neutral-400 font-bold tracking-tight py-2 px-4 leading-relaxed uppercase">
         *Es un valor informativo. El ahorro real depende de los T&C de cada entidad, la disponibilidad en góndola y la forma de pago elegida al finalizar la compra.
       </p>
     </div>

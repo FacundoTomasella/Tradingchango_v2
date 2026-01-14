@@ -121,8 +121,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, profile, o
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-      <div ref={modalRef} className="bg-white dark:bg-slate-950 w-full max-w-sm rounded-[2.5rem] p-8 relative shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto no-scrollbar">
-        <button onClick={onClose} className="absolute top-6 right-6 text-slate-400 text-xl hover:text-slate-600 transition-colors">&times;</button>
+      <div ref={modalRef} className="bg-white dark:bg-black w-full max-w-sm rounded-[2.5rem] p-8 relative shadow-2xl border border-neutral-200 dark:border-neutral-800 max-h-[90vh] overflow-y-auto no-scrollbar">
+        <button onClick={onClose} className="absolute top-6 right-6 text-neutral-400 text-xl hover:text-black dark:hover:text-white transition-colors">&times;</button>
         
         {success && <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 text-green-500 text-xs font-bold rounded-2xl text-center">{success}</div>}
         {error && <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-2xl text-center">{error}</div>}
@@ -138,9 +138,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, profile, o
                 </div>
             </div>
             <h2 className="text-2xl font-black mb-1 dark:text-white tracking-tighter">TradingChango</h2>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-10">Tu aliado contra la inflación</p>
-            <button onClick={() => { setMode('register'); setView('form'); }} className="w-full bg-slate-900 dark:bg-white dark:text-black text-white py-4 rounded-2xl font-bold mb-3 active:scale-95 transition-all shadow-xl">Crear Cuenta</button>
-            <button onClick={() => { setMode('login'); setView('form'); }} className="w-full border border-slate-200 dark:border-slate-800 py-4 rounded-2xl font-bold dark:text-white active:scale-95 transition-all">Iniciar Sesión</button>
+            <p className="text-neutral-400 text-[10px] font-black uppercase tracking-widest mb-10">Tu aliado contra la inflación</p>
+            <button onClick={() => { setMode('register'); setView('form'); }} className="w-full bg-black dark:bg-white dark:text-black text-white py-4 rounded-2xl font-bold mb-3 active:scale-95 transition-all shadow-xl">Crear Cuenta</button>
+            <button onClick={() => { setMode('login'); setView('form'); }} className="w-full border border-neutral-200 dark:border-neutral-800 py-4 rounded-2xl font-bold dark:text-white active:scale-95 transition-all">Iniciar Sesión</button>
           </div>
         )}
 
@@ -153,29 +153,29 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, profile, o
             {mode === 'register' && (
               <>
                 <div className="grid grid-cols-2 gap-2">
-                  <input type="text" value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Nombre" required className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl dark:text-white text-xs" />
-                  <input type="text" value={apellido} onChange={e=>setApellido(e.target.value)} placeholder="Apellido" required className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl dark:text-white text-xs" />
+                  <input type="text" value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Nombre" required className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-4 rounded-xl dark:text-white text-xs" />
+                  <input type="text" value={apellido} onChange={e=>setApellido(e.target.value)} placeholder="Apellido" required className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-4 rounded-xl dark:text-white text-xs" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Fecha de Nacimiento</label>
-                  <input type="date" value={fechaNacimiento} onChange={e=>setFechaNacimiento(e.target.value)} required className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl dark:text-white text-xs" />
+                  <label className="text-[9px] font-black text-neutral-400 uppercase ml-1">Fecha de Nacimiento</label>
+                  <input type="date" value={fechaNacimiento} onChange={e=>setFechaNacimiento(e.target.value)} required className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-4 rounded-xl dark:text-white text-xs" />
                 </div>
               </>
             )}
 
-            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" required className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl dark:text-white text-xs" />
-            <input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Contraseña" required className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-xl dark:text-white text-xs" />
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" required className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-4 rounded-xl dark:text-white text-xs" />
+            <input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Contraseña" required className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-4 rounded-xl dark:text-white text-xs" />
             
             <button disabled={loading} className="w-full bg-green-500 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-green-500/20 active:scale-95 transition-all mt-4">
               {loading ? '...' : (mode === 'login' ? 'Entrar' : 'Crear Cuenta')}
             </button>
-            <button type="button" onClick={() => setView('welcome')} className="w-full text-[10px] font-black text-slate-400 uppercase tracking-widest mt-4">Volver</button>
+            <button type="button" onClick={() => setView('welcome')} className="w-full text-[10px] font-black text-neutral-400 uppercase tracking-widest mt-4">Volver</button>
           </form>
         )}
 
         {view === 'profile' && user && (
           <div className="text-center">
-            <div className="w-20 h-20 bg-slate-100 dark:bg-slate-900 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6 text-slate-400 border border-slate-100 dark:border-slate-800">
+            <div className="w-20 h-20 bg-neutral-100 dark:bg-neutral-900 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6 text-neutral-400 border border-neutral-100 dark:border-neutral-800">
               <i className="fa-solid fa-user-astronaut"></i>
             </div>
             <h4 className="font-black dark:text-white text-lg mb-1 truncate tracking-tighter">
@@ -184,9 +184,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, profile, o
             <p className="text-[10px] font-black text-green-500 uppercase tracking-widest mb-10">Membresía {profile?.subscription || 'Free'}</p>
             
             <div className="space-y-3">
-              <button onClick={() => setView('membresias')} className="w-full bg-slate-50 dark:bg-slate-900 p-5 rounded-2xl text-left flex items-center justify-between border border-slate-100 dark:border-slate-800 active:scale-[0.98] transition-all">
+              <button onClick={() => setView('membresias')} className="w-full bg-neutral-50 dark:bg-neutral-900 p-5 rounded-2xl text-left flex items-center justify-between border border-neutral-100 dark:border-neutral-800 active:scale-[0.98] transition-all">
                 <span className="text-xs font-bold dark:text-white uppercase tracking-tight">Beneficios Bancarios</span>
-                <i className="fa-solid fa-chevron-right text-slate-300"></i>
+                <i className="fa-solid fa-chevron-right text-neutral-300"></i>
               </button>
               <button onClick={handleSignOut} className="w-full text-red-500 text-[10px] font-black uppercase tracking-widest py-6 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl transition-all">Cerrar Sesión</button>
             </div>
@@ -198,7 +198,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, profile, o
             <h3 className="text-lg font-black dark:text-white mb-6 uppercase tracking-tighter">Vincular Beneficios</h3>
             <div className="space-y-6">
               {catalogo.map(m => (
-                <div key={m.slug} className="border-b border-slate-100 dark:border-slate-800 pb-4 last:border-0">
+                <div key={m.slug} className="border-b border-neutral-100 dark:border-neutral-800 pb-4 last:border-0">
                   <div className="flex items-center gap-3 mb-4">
                     <img src={m.logo_url} alt={m.nombre} className="w-10 h-10 rounded-xl object-contain bg-white p-1.5 shadow-sm" />
                     <span className="text-xs font-bold dark:text-white uppercase tracking-tight">{m.nombre}</span>
@@ -206,13 +206,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, user, profile, o
                   <div className="flex flex-wrap gap-2">
                     {m.opciones?.length ? m.opciones.map(opt => {
                       const active = profile?.membresias?.some(um => um.slug === m.slug && um.tipo === opt);
-                      return <button key={opt} onClick={() => toggleMembership(m.slug, opt)} className={`text-[9px] font-black px-4 py-2.5 rounded-xl border transition-all ${active ? 'bg-green-500 text-white border-green-500' : 'bg-slate-50 dark:bg-slate-900 text-slate-400'}`}>{opt}</button>
-                    }) : <button onClick={() => toggleMembership(m.slug)} className={`text-[9px] font-black px-4 py-2.5 rounded-xl border transition-all ${profile?.membresias?.some(um => um.slug === m.slug) ? 'bg-green-500 text-white border-green-500' : 'bg-slate-50 dark:bg-slate-900 text-slate-400'}`}>Activar</button>}
+                      return <button key={opt} onClick={() => toggleMembership(m.slug, opt)} className={`text-[9px] font-black px-4 py-2.5 rounded-xl border transition-all ${active ? 'bg-green-500 text-white border-green-500' : 'bg-neutral-50 dark:bg-neutral-900 text-neutral-400'}`}>{opt}</button>
+                    }) : <button onClick={() => toggleMembership(m.slug)} className={`text-[9px] font-black px-4 py-2.5 rounded-xl border transition-all ${profile?.membresias?.some(um => um.slug === m.slug) ? 'bg-green-500 text-white border-green-500' : 'bg-neutral-50 dark:bg-neutral-900 text-neutral-400'}`}>Activar</button>}
                   </div>
                 </div>
               ))}
             </div>
-            <button onClick={() => setView('profile')} className="w-full bg-slate-900 dark:bg-white dark:text-black text-white py-4 rounded-2xl font-black mt-10 shadow-xl uppercase tracking-widest text-[10px]">Volver</button>
+            <button onClick={() => setView('profile')} className="w-full bg-black dark:bg-white dark:text-black text-white py-4 rounded-2xl font-black mt-10 shadow-xl uppercase tracking-widest text-[10px]">Volver</button>
           </div>
         )}
       </div>

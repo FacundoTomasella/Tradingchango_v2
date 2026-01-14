@@ -17,12 +17,12 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentTab, setCurrentTab, cartCo
   ];
 
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-screen-md bg-white dark:bg-black border-t border-slate-100 dark:border-slate-900 flex justify-around py-3 z-40">
+    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-screen-md bg-white dark:bg-black border-t border-neutral-100 dark:border-neutral-900 flex justify-around py-3 z-40">
       {tabs.map((tab) => (
         <button 
           key={tab.id}
           onClick={() => setCurrentTab(tab.id)}
-          className={`relative flex flex-col items-center gap-1 w-1/5 transition-all ${currentTab === tab.id ? 'text-black dark:text-white' : 'text-slate-400'}`}
+          className={`relative flex flex-col items-center gap-1 w-1/5 transition-all ${currentTab === tab.id ? 'text-black dark:text-white' : 'text-neutral-400'}`}
         >
           <i className={`fa-solid ${tab.icon} text-[20px]`}></i>
           <span className={`text-[10px] font-[800] tracking-tight ${currentTab === tab.id ? 'opacity-100' : 'opacity-60'}`}>{tab.label}</span>
