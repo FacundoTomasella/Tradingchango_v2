@@ -97,7 +97,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
         ref={modalRef}
         className="w-full max-w-2xl h-full md:h-auto md:max-h-[90vh] bg-white dark:bg-black md:rounded-[2rem] overflow-y-auto no-scrollbar shadow-2xl relative"
       >
-        {/* Header Modal */}
         <div className="sticky top-0 z-20 bg-white/95 dark:bg-black/95 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-neutral-100 dark:border-neutral-900">
           <button onClick={onClose} className="text-black dark:text-white p-2 -ml-2">
             <i className="fa-solid fa-arrow-left text-lg"></i>
@@ -111,7 +110,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
         </div>
 
         <div className="p-6 md:p-10 flex flex-col">
-          {/* Top Section: Imagen a la izquierda, Texto a la derecha */}
           <div className="flex gap-6 md:gap-10 items-start mb-10">
             <div className="w-28 h-28 md:w-44 md:h-44 bg-white rounded-3xl border border-neutral-100 shadow-sm flex items-center justify-center p-4 transition-transform hover:scale-105 shrink-0">
               <img src={product.imagen_url || 'https://via.placeholder.com/200?text=No+Img'} alt={product.nombre} className="w-full h-full object-contain" />
@@ -123,7 +121,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
               </h1>
               
               <div className="flex flex-col">
-                <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1">
+                <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">
                   Mejor precio hoy en {minStore}
                 </span>
                 <div className="flex items-baseline gap-2">
@@ -136,31 +134,27 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
             </div>
           </div>
 
-          {/* Fila de Indicadores */}
           <div className="mb-10 w-full flex flex-wrap gap-4 justify-center">
             <div className="inline-flex items-center gap-3 bg-neutral-50 dark:bg-neutral-900/50 px-5 py-3 rounded-2xl border border-neutral-100 dark:border-neutral-800">
-              <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-tight">Precio promedio:</span>
+              <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-tight">Precio promedio:</span>
               <span className="text-[15px] font-black text-black dark:text-white font-mono">$ {format(Math.round(avgPrice))}</span>
             </div>
-            {/* Aquí podrían ir otros indicadores en el futuro */}
           </div>
 
           <hr className="w-full border-neutral-100 dark:border-neutral-900 mb-10" />
 
-          {/* Selector de Temporalidad - Centrado */}
           <div className="w-full flex justify-center gap-1.5 mb-10 overflow-x-auto no-scrollbar py-1">
             {[7, 15, 30, 90, 180, 365].map((d) => (
               <button 
                 key={d} 
                 onClick={() => setDays(d)}
-                className={`min-w-[50px] py-2.5 px-2 text-[10px] font-black rounded-xl transition-all border ${days === d ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white shadow-lg' : 'bg-neutral-50 dark:bg-neutral-900 text-neutral-400 border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 dark:hover:border-neutral-600'}`}
+                className={`min-w-[50px] py-2.5 px-2 text-[10px] font-black rounded-xl transition-all border ${days === d ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white shadow-lg' : 'bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border-neutral-200 dark:border-neutral-800 hover:border-neutral-500 dark:hover:border-neutral-500'}`}
               >
                 {d < 30 ? `${d}D` : d < 365 ? `${Math.floor(d / 30)}M` : '1Y'}
               </button>
             ))}
           </div>
 
-          {/* Gráfico - Títulos Centrados */}
           <div className="mb-12 w-full">
             <div className="flex flex-col items-center text-center mb-8">
               <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-black dark:text-white mb-2">Historial de Tendencia</h3>
@@ -168,7 +162,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
                  <span className={`text-[14px] font-black px-2 py-1 rounded-lg ${isTrendUp ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>
                    {isTrendUp ? '▲' : '▼'} {Math.abs(percentageChange).toFixed(1)}%
                  </span>
-                 <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-tight">Variación en {days} días</span>
+                 <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-tight">Variación en {days} días</span>
               </div>
             </div>
             
@@ -203,7 +197,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
                           const data = payload[0].payload;
                           return (
                             <div className="bg-white dark:bg-neutral-900 p-4 rounded-2xl shadow-2xl border border-neutral-100 dark:border-neutral-800 animate-in zoom-in duration-200">
-                              <p className="text-[9px] font-black text-neutral-400 uppercase tracking-widest mb-1">{data.fullDate}</p>
+                              <p className="text-[9px] font-black text-neutral-500 uppercase tracking-widest mb-1">{data.fullDate}</p>
                               <p className="text-[11px] font-bold text-black dark:text-white uppercase mb-2">{data.store}</p>
                               <p className="text-2xl font-mono font-black text-black dark:text-white tracking-tighter">${format(data.price)}</p>
                             </div>
@@ -223,7 +217,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-[11px] font-black text-neutral-300 uppercase tracking-[0.2em] bg-neutral-50/50 dark:bg-neutral-900/20 rounded-3xl border border-dashed border-neutral-200 dark:border-neutral-800">
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-[11px] font-black text-neutral-400 uppercase tracking-[0.2em] bg-neutral-50/50 dark:bg-neutral-900/20 rounded-3xl border border-dashed border-neutral-200 dark:border-neutral-800">
                   <i className="fa-solid fa-chart-line text-3xl mb-4 opacity-20"></i>
                   Sin datos suficientes
                 </div>
@@ -231,7 +225,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
             </div>
           </div>
 
-          {/* Comparativa por Mercado */}
           <div className="w-full border border-neutral-100 dark:border-neutral-800 rounded-[1.5rem] overflow-hidden mb-8">
             <button 
               onClick={() => setIsPricesOpen(!isPricesOpen)}
@@ -239,11 +232,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
             >
               <div className="flex items-center gap-4">
                 <div className="w-8 h-8 rounded-lg bg-white dark:bg-neutral-800 flex items-center justify-center shadow-sm">
-                  <i className="fa-solid fa-shop text-neutral-400 text-sm"></i>
+                  <i className="fa-solid fa-shop text-neutral-500 text-sm"></i>
                 </div>
                 <span className="text-[11px] font-black uppercase tracking-[0.15em] text-black dark:text-white">Comparativa por Mercado</span>
               </div>
-              <i className={`fa-solid fa-chevron-${isPricesOpen ? 'up' : 'down'} text-neutral-400 text-xs transition-transform`}></i>
+              <i className={`fa-solid fa-chevron-${isPricesOpen ? 'up' : 'down'} text-neutral-500 text-xs transition-transform`}></i>
             </button>
             
             {isPricesOpen && (
@@ -255,7 +248,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
                   return (
                     <div key={s.name} className="flex items-center justify-between py-4 border-b border-neutral-50 dark:border-neutral-900 last:border-0 last:pb-0">
                       <div className="flex flex-col">
-                        <span className="text-[11px] font-black text-neutral-400 uppercase tracking-tight">{s.name}</span>
+                        <span className="text-[11px] font-black text-neutral-500 uppercase tracking-tight">{s.name}</span>
                         {url && (
                           <a 
                             href={url} 
@@ -277,7 +270,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
             )}
           </div>
 
-          {/* Botón Acción - Sticky al fondo */}
           <div className="w-full mt-4 sticky bottom-0 bg-white/95 dark:bg-black/95 backdrop-blur-md pb-8 pt-4">
             <button 
               onClick={() => onFavoriteToggle(product.id)} 

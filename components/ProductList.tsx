@@ -53,11 +53,11 @@ const ProductList: React.FC<ProductListProps> = ({
   if (products.length === 0 && searchTerm) {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-10 text-center animate-in fade-in zoom-in duration-500">
-        <div className="w-20 h-20 bg-neutral-50 dark:bg-neutral-900/50 rounded-[2rem] flex items-center justify-center text-neutral-300 mb-6 text-3xl">
+        <div className="w-20 h-20 bg-neutral-50 dark:bg-neutral-900/50 rounded-[2rem] flex items-center justify-center text-neutral-500 mb-6 text-3xl">
           <i className="fa-solid fa-magnifying-glass"></i>
         </div>
-        <h3 className="text-lg font-black text-neutral-900 dark:text-white mb-2 uppercase tracking-tighter">No se encontraron productos</h3>
-        <p className="text-sm text-neutral-400 font-medium leading-relaxed">Probá buscando con otras palabras o navegando por categorías.</p>
+        <h3 className="text-lg font-black text-black dark:text-white mb-2 uppercase tracking-tighter">No se encontraron productos</h3>
+        <p className="text-sm text-neutral-600 dark:text-neutral-500 font-medium leading-relaxed">Probá buscando con otras palabras o navegando por categorías.</p>
       </div>
     );
   }
@@ -65,11 +65,11 @@ const ProductList: React.FC<ProductListProps> = ({
   if (products.length === 0 && isCartView) {
     return (
       <div className="flex flex-col items-center justify-center py-32 px-10 text-center animate-in fade-in zoom-in duration-700">
-        <div className="w-24 h-24 bg-neutral-50 dark:bg-neutral-900/50 rounded-[2.5rem] flex items-center justify-center text-neutral-300 mb-8 text-4xl">
+        <div className="w-24 h-24 bg-neutral-50 dark:bg-neutral-900/50 rounded-[2.5rem] flex items-center justify-center text-neutral-500 mb-8 text-4xl">
           <i className="fa-solid fa-cart-shopping"></i>
         </div>
-        <h3 className="text-xl font-black text-neutral-900 dark:text-white mb-4 uppercase tracking-tighter">Tu chango está vacío</h3>
-        <p className="text-sm text-neutral-400 font-medium leading-relaxed max-w-[280px]">
+        <h3 className="text-xl font-black text-black dark:text-white mb-4 uppercase tracking-tighter">Tu chango está vacío</h3>
+        <p className="text-sm text-neutral-600 dark:text-neutral-500 font-medium leading-relaxed max-w-[280px]">
           Agregá productos para comparar el total en los distintos supermercados y maximizar tu ahorro.
         </p>
       </div>
@@ -77,7 +77,7 @@ const ProductList: React.FC<ProductListProps> = ({
   }
 
   return (
-    <div className="divide-y divide-border-light dark:divide-border-dark">
+    <div className="divide-y divide-neutral-100 dark:divide-neutral-900">
       {products.map((p) => {
         const fav = isFavorite(p.id);
         const qty = quantities ? (quantities[p.id] || 1) : 1;
@@ -87,27 +87,27 @@ const ProductList: React.FC<ProductListProps> = ({
           <div 
             key={p.id} 
             onClick={() => onProductClick(p.id)}
-            className="flex items-center justify-between px-[20px] py-[18px] bg-[#ffffff] dark:bg-[#000000] hover:bg-neutral-50 dark:hover:bg-neutral-900/30 cursor-pointer transition-colors"
+            className="flex items-center justify-between px-[20px] py-[18px] bg-white dark:bg-black hover:bg-neutral-50 dark:hover:bg-neutral-900/30 cursor-pointer transition-colors"
           >
             <div className="flex-1 flex items-center justify-between pr-4">
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center flex-wrap gap-1.5">
-                  <span className="font-[800] text-primary dark:text-[#ffffff] text-[16px] md:text-[17px] tracking-tight uppercase font-mono block">
+                  <span className="font-[800] text-black dark:text-white text-[16px] md:text-[17px] tracking-tight uppercase font-mono block">
                     {p.ticker || p.nombre.substring(0, 5).toUpperCase()}
                   </span>
                   {badges && badges.map((b, idx) => (
-                    <span key={idx} className="bg-chart-green text-white text-[9px] font-[800] px-1.5 py-0.5 rounded-sm uppercase leading-none font-sans">
+                    <span key={idx} className="bg-green-500 text-white text-[9px] font-[800] px-1.5 py-0.5 rounded-sm uppercase leading-none font-sans">
                       {b}
                     </span>
                   ))}
                 </div>
-                <span className="text-[13px] md:text-[14px] font-medium text-neutral-500 dark:text-neutral-400 line-clamp-1 font-sans">
+                <span className="text-[13px] md:text-[14px] font-medium text-neutral-600 dark:text-neutral-400 line-clamp-1 font-sans">
                   {p.nombre}
                 </span>
               </div>
 
               <div className="text-right flex flex-col items-end min-w-[100px]">
-                <span className="font-mono font-[700] text-primary dark:text-[#ffffff] text-[17px] md:text-[18px]">
+                <span className="font-mono font-[700] text-black dark:text-white text-[17px] md:text-[18px]">
                   ${format(p.stats.min)}
                 </span>
                 <span className={`font-mono text-[12px] font-[700] mt-0.5 ${p.stats.trendClass}`}>
@@ -122,9 +122,9 @@ const ProductList: React.FC<ProductListProps> = ({
                   className="flex items-center gap-3 bg-neutral-100 dark:bg-neutral-900 px-2 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <button onClick={() => onUpdateQuantity(p.id, -1)} className="text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white px-2 font-black text-base">-</button>
+                  <button onClick={() => onUpdateQuantity(p.id, -1)} className="text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white px-2 font-black text-base">-</button>
                   <span className="font-mono text-sm font-black min-w-[20px] text-center text-black dark:text-white">{qty}</span>
-                  <button onClick={() => onUpdateQuantity(p.id, 1)} className="text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white px-2 font-black text-base">+</button>
+                  <button onClick={() => onUpdateQuantity(p.id, 1)} className="text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white px-2 font-black text-base">+</button>
                 </div>
               )}
               
@@ -133,7 +133,7 @@ const ProductList: React.FC<ProductListProps> = ({
                   e.stopPropagation();
                   onFavoriteToggle(p.id);
                 }}
-                className={`transition-all flex items-center justify-center active:scale-90 p-2 ${fav ? 'text-star-gold' : 'text-neutral-300'}`}
+                className={`transition-all flex items-center justify-center active:scale-90 p-2 ${fav ? 'text-star-gold' : 'text-neutral-400'}`}
               >
                 <i className="fa-solid fa-cart-shopping text-[20px]"></i>
               </button>
