@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { Product, Benefit, UserMembership } from '../types';
 
@@ -30,7 +31,6 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
         const price = item.prices[store.index];
         const qty = favorites[item.id] || 1;
         
-        // Si el producto no tiene precio en este super, marcamos como incompleto
         if (price <= 0) {
           hasAllItems = false;
           return;
@@ -72,33 +72,30 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
         hasAllItems
       };
     })
-    // REGLA CRÍTICA: Solo supermercados con el chango COMPLETO
     .filter(r => r.hasAllItems && items.length > 0)
     .sort((a, b) => a.totalChango - b.totalChango);
   }, [items, favorites, benefits]);
 
   if (items.length === 0) return null;
 
-  // Si ningún supermercado tiene todos los productos
   if (results.length === 0) {
     return (
       <div className="p-4 animate-in fade-in duration-700">
-        <div className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-xl text-center">
-          <div className="w-16 h-16 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
-            <i className="fa-solid fa-circle-exclamation text-2xl"></i>
+        <div className="bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 rounded-[2rem] p-6 shadow-xl text-center">
+          <div className="w-12 h-12 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
+            <i className="fa-solid fa-circle-exclamation text-xl"></i>
           </div>
-          <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-2">Chango Incompleto</h3>
-          <p className="text-xs text-slate-400 font-medium">Ningún supermercado tiene stock de todos los productos de tu lista. Probá quitando alguno para comparar totales.</p>
+          <h3 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-1">Chango Incompleto</h3>
+          <p className="text-[10px] text-slate-400 font-medium">Ningún supermercado tiene stock de todos los productos de tu lista.</p>
         </div>
       </div>
     );
   }
 
   const best = results[0];
-  const others = results.slice(1);
+  const others = results.slice(1); // Excluimos al ganador de la lista "Otros"
   
-  // Ahorro total relativo a la opción más cara viable que tenga todo el chango
-  const worstOption = others.length > 0 ? others[others.length - 1] : best;
+  const worstOption = results.length > 1 ? results[results.length - 1] : best;
   const potentialSavings = worstOption.totalChango - best.totalChango;
 
   const paymentAdvice = useMemo(() => {
@@ -122,104 +119,93 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
   }, [best, userMemberships]);
 
   return (
-    <div className="p-4 space-y-4 animate-in fade-in duration-700">
-      <div className="bg-white dark:bg-slate-950 border-2 border-green-500 rounded-[2.5rem] p-8 shadow-2xl shadow-green-500/10 relative overflow-hidden">
+    <div className="p-4 space-y-3 animate-in fade-in duration-700">
+      {/* Tarjeta de Ganador Compacta */}
+      <div className="bg-white dark:bg-slate-950 border border-green-500/30 rounded-[1.5rem] p-5 shadow-lg shadow-green-500/5 relative overflow-hidden">
+        <div className="absolute -top-4 -right-4 text-green-500/10 text-6xl rotate-12 pointer-events-none">
+          <i className="fa-solid fa-trophy"></i>
+        </div>
+
         <div className="relative z-10">
-          
-          {/* 1. Ahorro Total */}
-          <div className="text-center mb-6">
-             <span className="text-[10px] font-black uppercase text-green-500 tracking-[0.2em]">Ahorro Total</span>
-             <div className="text-6xl font-black text-green-500 tracking-tighter mt-1">${format(Math.round(potentialSavings))}</div>
-          </div>
-
-          {/* 2. Tu mejor opción hoy es X */}
-          <div className="text-center mb-8">
-            <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Tu mejor opción hoy es</h2>
-            <div className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">{best.name}</div>
-          </div>
-
-          {/* 3, 4, 5. Desglose */}
-          <div className="space-y-3 bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-800">
-            <div className="flex justify-between items-center text-xs font-bold text-slate-500 uppercase tracking-tight">
-              <span>Subtotal</span>
-              <span className="font-mono text-sm">${format(Math.round(best.subtotal))}</span>
-            </div>
-            
-            <div className="flex justify-between items-center text-xs font-bold text-green-500 uppercase tracking-tight">
-              <span>Descuentos de góndola</span>
-              <span className="font-mono text-sm">-${format(Math.round(best.gondolaDiscount))}</span>
-            </div>
-
-            <div className="pt-4 mt-2 border-t border-slate-200 dark:border-slate-800 flex justify-between items-baseline">
-              <span className="font-black text-[10px] uppercase tracking-[0.15em] text-slate-900 dark:text-white">Total Chango*</span>
-              <span className="text-4xl font-mono font-black text-slate-900 dark:text-white">
-                ${format(Math.round(best.totalChango))}
-              </span>
-            </div>
-          </div>
-
-          {/* Disclaimer */}
-          <p className="mt-4 text-[9px] text-center text-slate-400 font-medium leading-tight">
-            *Comparación basada en el stock completo ({items.length} productos) disponible en este mercado.
-          </p>
-
-          {/* Estrategia de Pago */}
-          <div className="mt-8 space-y-4">
-            <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Para seguir ahorrando paga con</h4>
-            
-            <div className="grid grid-cols-1 gap-3">
-              {paymentAdvice?.recommend && (
-                <div className="p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 rounded-2xl flex items-center gap-4">
-                  <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/40 rounded-xl flex items-center justify-center text-amber-600 flex-shrink-0">
-                    <i className="fa-solid fa-link"></i>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-[10px] font-bold dark:text-white leading-snug">
-                      Pedí <b className="text-amber-600 uppercase">{paymentAdvice.recommend.entidad_nombre}</b> (referido) y sumá un <b className="text-amber-600">{(paymentAdvice.recommend.descuento * 100).toFixed(0)}% OFF</b> extra.
-                    </p>
-                    <a href={paymentAdvice.recommend.link_referido} target="_blank" rel="noopener noreferrer" className="mt-1.5 inline-block text-[9px] font-black text-amber-600 uppercase underline underline-offset-4">Obtener Beneficio</a>
-                  </div>
-                </div>
-              )}
-
-              {paymentAdvice?.owned && (
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-2xl flex items-center gap-4">
-                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center text-blue-600 flex-shrink-0">
-                    <i className="fa-solid fa-id-card"></i>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-[10px] font-bold dark:text-white leading-snug">
-                      Usá tu membresía de <b className="text-blue-600 uppercase">{paymentAdvice.owned.entidad_nombre}</b> vinculada para descontar un <b className="text-blue-600">{(paymentAdvice.owned.descuento * 100).toFixed(0)}%</b> adicional.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Comparativa desplegable */}
-          <div className="mt-8 border-t border-slate-100 dark:border-slate-800 pt-6">
-            <button 
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="w-full flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-slate-900 dark:hover:text-white transition-colors"
-            >
-              <span>Comparar con otros mercados</span>
-              <i className={`fa-solid fa-chevron-${isExpanded ? 'up' : 'down'} transition-transform`}></i>
-            </button>
-            
-            {isExpanded && (
-              <div className="mt-4 space-y-2 animate-in slide-in-from-top-2 duration-300">
-                {results.map((store) => (
-                  <div key={store.name} className="flex justify-between items-center py-3 px-4 bg-slate-50 dark:bg-slate-900/30 rounded-xl border border-slate-100 dark:border-slate-800">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">{store.name}</span>
-                    <span className="font-mono text-sm font-bold text-slate-900 dark:text-white">${format(Math.round(store.totalChango))}</span>
-                  </div>
-                ))}
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <i className="fa-solid fa-trophy text-green-500 text-sm"></i>
+                <span className="text-[9px] font-black uppercase text-green-500 tracking-[0.2em]">Mejor Opción</span>
               </div>
-            )}
+              <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">{best.name}</h2>
+            </div>
+            <div className="text-right">
+              <span className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em]">Ahorrás</span>
+              <div className="text-2xl font-black text-green-500 tracking-tighter">${format(Math.round(potentialSavings))}</div>
+            </div>
           </div>
+
+          <div className="grid grid-cols-3 gap-2 py-3 border-y border-slate-100 dark:border-slate-800">
+            <div className="text-center">
+              <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Subtotal</div>
+              <div className="text-[11px] font-bold dark:text-white font-mono">${format(Math.round(best.subtotal))}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Góndola</div>
+              <div className="text-[11px] font-bold text-green-500 font-mono">-${format(Math.round(best.gondolaDiscount))}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total</div>
+              <div className="text-[12px] font-black dark:text-white font-mono">${format(Math.round(best.totalChango))}</div>
+            </div>
+          </div>
+
+          {/* Estrategia de Pago - Solo mostramos lo más relevante de forma muy compacta */}
+          {(paymentAdvice?.owned || paymentAdvice?.recommend) && (
+            <div className="mt-4 flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+              {paymentAdvice.owned && (
+                <div className="flex-shrink-0 flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full border border-blue-100 dark:border-blue-900/30">
+                  <i className="fa-solid fa-id-card text-[10px] text-blue-600"></i>
+                  <span className="text-[9px] font-bold text-blue-600 uppercase">Usá {paymentAdvice.owned.entidad_nombre}</span>
+                </div>
+              )}
+              {paymentAdvice.recommend && (
+                <a href={paymentAdvice.recommend.link_referido} target="_blank" rel="noopener noreferrer" className="flex-shrink-0 flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-full border border-amber-100 dark:border-amber-900/30">
+                  <i className="fa-solid fa-link text-[10px] text-amber-600"></i>
+                  <span className="text-[9px] font-bold text-amber-600 uppercase">Referido: {paymentAdvice.recommend.entidad_nombre}</span>
+                </a>
+              )}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Comparativa Desplegable - Solo otros mercados viables */}
+      {others.length > 0 && (
+        <div className="px-2">
+          <button 
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="w-full flex items-center justify-between text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] py-2 hover:text-slate-900 dark:hover:text-white transition-colors"
+          >
+            <span>Ver otros mercados comparables ({others.length})</span>
+            <i className={`fa-solid fa-chevron-${isExpanded ? 'up' : 'down'} transition-transform`}></i>
+          </button>
+          
+          {isExpanded && (
+            <div className="mt-2 space-y-1 animate-in slide-in-from-top-2 duration-300">
+              {others.map((store) => (
+                <div key={store.name} className="flex justify-between items-center py-2.5 px-4 bg-slate-50 dark:bg-slate-900/30 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{store.name}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[9px] font-bold text-red-500 font-mono">+${format(Math.round(store.totalChango - best.totalChango))}</span>
+                    <span className="font-mono text-[11px] font-bold text-slate-900 dark:text-white">${format(Math.round(store.totalChango))}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <p className="text-[8px] text-center text-slate-400 font-medium tracking-tight">
+        *Comparación basada en el stock completo ({items.length} productos) disponible.
+      </p>
     </div>
   );
 };
