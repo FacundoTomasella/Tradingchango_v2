@@ -257,7 +257,6 @@ const AuthModal: React.FC<AuthModalProps> = ({
                         <div className="flex flex-wrap gap-1.5 ml-9">
                           {m.opciones?.length ? m.opciones.map(opt => {
                             const active = profile?.membresias?.some(um => um.slug === m.slug && um.tipo === opt);
-                            const label = `${m.nombre} ${opt}`;
                             return (
                               <button 
                                 key={opt} 

@@ -259,7 +259,7 @@ const App: React.FC = () => {
                 benefits={benefits} 
                 userMemberships={profile?.membresias} 
                 onSaveCart={handleSaveCurrentCart}
-                canSave={user && savedCarts.length < 2}
+                canSave={!!user && savedCarts.length < 2}
               />
             )}
             <ProductList 
