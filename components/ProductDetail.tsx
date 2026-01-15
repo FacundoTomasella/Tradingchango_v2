@@ -119,14 +119,14 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
       >
         <div className="sticky top-0 z-20 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-md px-4 py-2 flex items-center justify-between border-b border-neutral-100 dark:border-neutral-900">
           <button onClick={onClose} className="text-black dark:text-white p-2">
-            <i className="fa-solid fa-arrow-left text-lg"></i>
+            <i className="fa-solid fa-arrow-left text-xl"></i>
           </button>
-          <span className="text-[10px] font-black tracking-widest text-black dark:text-white uppercase">{ticker}</span>
+          <span className="text-xs font-black tracking-widest text-black dark:text-white uppercase">{ticker}</span>
           <div className="flex items-center gap-2">
             <button onClick={handleShare} className="text-black dark:text-white p-2">
-              <i className="fa-solid fa-share-nodes text-base"></i>
+              <i className="fa-solid fa-share-nodes text-lg"></i>
             </button>
-            <button onClick={() => onFavoriteToggle(product.id)} className={`text-lg transition-transform active:scale-90 ${isFavorite ? 'text-star-gold' : 'text-black dark:text-white'}`}>
+            <button onClick={() => onFavoriteToggle(product.id)} className={`text-xl transition-transform active:scale-90 ${isFavorite ? 'text-star-gold' : 'text-black dark:text-white'}`}>
               <i className="fa-solid fa-cart-shopping"></i>
             </button>
           </div>
@@ -139,29 +139,29 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
             </div>
             
             <div className="flex flex-col flex-1">
-              <h1 className="text-base md:text-xl font-black text-black dark:text-white leading-tight mb-1 tracking-tighter">
+              <h1 className="text-lg md:text-2xl font-black text-black dark:text-white leading-tight mb-1 tracking-tighter">
                 {product.nombre}
               </h1>
               
               <div className="flex flex-col">
                 <div className="flex items-baseline gap-2 mb-0.5">
-                  <span className="text-[10px] font-black text-black dark:text-white uppercase tracking-widest">
+                  <span className="text-xs font-black text-black dark:text-white uppercase tracking-widest">
                     Mejor precio hoy en {minStore}
                   </span>
                   <a href={minStoreUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600">
-                    <i className="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    <i className="fa-solid fa-arrow-up-right-from-square text-sm"></i>
                   </a>
                 </div>
                 <div className="flex items-end gap-2">
                   <div className="flex items-baseline gap-0.5">
-                    <span className="text-sm font-bold text-black dark:text-white">$</span>
-                    <span className="text-2xl md:text-4xl font-black text-black dark:text-white tracking-tighter font-mono leading-none">
+                    <span className="text-base font-bold text-black dark:text-white">$</span>
+                    <span className="text-3xl md:text-5xl font-black text-black dark:text-white tracking-tighter font-mono leading-none">
                       {format(minPrice)}
                     </span>
                   </div>
                   <div className="flex items-baseline gap-1 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 px-2 py-1 rounded-md mb-0.5 shadow-sm">
-                    <span className="text-[8px] font-bold text-neutral-500 dark:text-neutral-400 uppercase">Promedio:</span>
-                    <span className="text-[11px] font-black text-black dark:text-white font-mono">$ {format(Math.round(avgPrice))}</span>
+                    <span className="text-[9px] font-bold text-neutral-500 dark:text-neutral-400 uppercase">Promedio:</span>
+                    <span className="text-[13px] font-black text-black dark:text-white font-mono">$ {format(Math.round(avgPrice))}</span>
                   </div>
                 </div>
               </div>
@@ -175,7 +175,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
               <button 
                 key={d} 
                 onClick={() => setDays(d)}
-                className={`min-w-[48px] py-2 px-2 text-[9px] font-black rounded-md transition-all border ${days === d ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white' : 'bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border-neutral-100 dark:border-neutral-800'}`}
+                className={`min-w-[48px] py-2 px-2 text-[10px] font-black rounded-md transition-all border ${days === d ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white' : 'bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border-neutral-100 dark:border-neutral-800'}`}
               >
                 {d < 30 ? `${d}D` : d < 365 ? `${Math.floor(d / 30)}M` : '1Y'}
               </button>
@@ -185,10 +185,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
           <div className="mb-3 w-full">
             <div className="flex flex-col items-center text-center mb-2">
               <div className="flex items-center gap-1.5">
-                 <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md ${isTrendUp ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>
+                 <span className={`text-xs font-black px-1.5 py-0.5 rounded-md ${isTrendUp ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>
                    {isTrendUp ? '▲' : '▼'} {Math.abs(percentageChange).toFixed(1)}%
                  </span>
-                 <span className="text-[8px] font-bold text-neutral-500 uppercase tracking-widest">Variación en {days} días</span>
+                 <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Variación en {days} días</span>
               </div>
             </div>
             
@@ -225,7 +225,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-[8px] font-black text-neutral-400 uppercase tracking-[0.2em] bg-neutral-50 dark:bg-neutral-900/20 rounded-xl border border-dashed border-neutral-200 dark:border-neutral-800">
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] bg-neutral-50 dark:bg-neutral-900/20 rounded-xl border border-dashed border-neutral-200 dark:border-neutral-800">
                   Sin datos suficientes
                 </div>
               )}
@@ -234,7 +234,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
 
           <div className="w-full border border-neutral-100 dark:border-neutral-800 rounded-lg overflow-hidden mb-4">
             <div className="w-full flex items-center justify-between p-2.5 bg-neutral-50 dark:bg-neutral-900/50">
-              <span className="text-[9px] font-black uppercase tracking-[0.1em] text-black dark:text-white">Comparativa por Mercado</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.1em] text-black dark:text-white">Comparativa por Mercado</span>
             </div>
             <div className="px-3 py-2 space-y-2 bg-white dark:bg-neutral-950">
               {STORES.map((s) => {
@@ -253,15 +253,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
                   'MAS ONLINE': 'bg-green-500',
                 };
 
-                const priceClassName = `text-sm font-mono font-black ${price === minPrice ? 'text-green-500' : 'text-black dark:text-white'}`;
+                const priceClassName = `text-base font-mono font-black ${price === minPrice ? 'text-green-500' : 'text-black dark:text-white'}`;
 
                 return (
                   <div key={s.name} className="flex items-center justify-between py-1.5 border-b border-neutral-50 dark:border-neutral-900 last:border-0">
                     <div className="flex items-center gap-2">
                       <span className={`w-2 h-2 rounded-full ${storeColors[s.name]}`}></span>
                       <div className="flex items-baseline gap-1.5">
-                        <span className="text-[11px] font-black text-black dark:text-white uppercase">{s.name}</span>
-                        {promo && <span className="bg-green-600 text-white text-[8px] font-[900] px-1 py-0.5 rounded-[1px] uppercase leading-none font-sans">{promo}</span>}
+                        <span className="text-[13px] font-black text-black dark:text-white uppercase">{s.name}</span>
+                        {promo && <span className="bg-green-600 text-white text-[9px] font-[900] px-1 py-0.5 rounded-[1px] uppercase leading-none font-sans">{promo}</span>}
                       </div>
                     </div>
                     {url ? (
@@ -282,7 +282,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
           <div className="w-full sticky bottom-0 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-md pb-2 pt-1">
             <button 
               onClick={() => onFavoriteToggle(product.id)} 
-              className={`w-full py-3.5 rounded-lg font-black uppercase tracking-[0.1em] text-[10px] transition-all flex items-center justify-center gap-2 active:scale-95 ${isFavorite ? 'bg-star-gold text-white' : 'bg-black dark:bg-white text-white dark:text-black'}`}
+              className={`w-full py-3.5 rounded-lg font-black uppercase tracking-[0.1em] text-xs transition-all flex items-center justify-center gap-2 active:scale-95 ${isFavorite ? 'bg-star-gold text-white' : 'bg-black dark:bg-white text-white dark:text-black'}`}
             >
               <i className="fa-solid fa-cart-shopping"></i>
               {isFavorite ? 'En el Chango' : 'Añadir al Chango'}
