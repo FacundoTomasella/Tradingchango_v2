@@ -8,12 +8,16 @@ interface CartSummaryProps {
   benefits: Benefit[];
   userMemberships?: UserMembership[];
   onSaveCart?: (name: string) => void;
-  canSave?: boolean;
+  canSave: boolean;
+  savedCarts: any[];
+  onLoadCart: (index: number) => void;
+  onDeleteCart: (index: number) => void;
 }
 
-const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, userMemberships = [], onSaveCart, canSave }) => {
+const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, userMemberships = [], onSaveCart, canSave, savedCarts, onLoadCart, onDeleteCart }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [newCartName, setNewCartName] = useState('');
+  const [showSaveInput, setShowSaveInput] = useState(false);
   const format = (n: number) => new Intl.NumberFormat('es-AR').format(n);
 
   const STORES = [
@@ -102,8 +106,8 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
 
   const paymentAdvice = useMemo(() => {
     if (!best.storeBenefits.length) return null;
-    const checkOwned = (entidad: string) => userMemberships.some(um => 
-      um.slug.toLowerCase() === entidad.toLowerCase() || 
+    const checkOwned = (entidad: string) => userMemberships.some(um =>
+      um.slug.toLowerCase() === entidad.toLowerCase() ||
       um.tipo.toLowerCase() === entidad.toLowerCase() ||
       um.slug.toLowerCase().includes(entidad.toLowerCase())
     );
@@ -117,24 +121,25 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
       <div className="bg-white dark:bg-neutral-950 border-[3px] border-black dark:border-white rounded-2xl p-4 shadow-xl relative">
         <div className="flex flex-col gap-3 relative z-10">
           
-          <div className="flex justify-between items-end">
-            <div className="space-y-0.5">
-              <span className="text-[9px] font-black uppercase text-neutral-500 tracking-[0.15em] block">Mejor opción:</span>
+          <div className="flex flex-col items-center gap-2 text-center">
+            <span className="text-black dark:text-white text-xs font-black uppercase tracking-[0.15em]">Mejor opción:</span>
+            
+            <div className="flex items-baseline justify-center gap-6 w-full">
               <h2 className="text-xl font-black text-black dark:text-white uppercase tracking-tighter leading-none flex items-center gap-2">
                 <i className="fa-solid fa-trophy text-star-gold text-lg animate-bounce"></i>
                 {best.name}
               </h2>
+              <div className="flex items-baseline gap-1">
+                <span className="text-lg font-black uppercase text-green-600 dark:text-green-400">Ahorrás:</span>
+                <div className="text-lg font-black text-green-600 dark:text-green-400 tracking-tighter font-mono">${format(Math.round(potentialSavings))}</div>
+              </div>
             </div>
-            <div className="text-right">
-              <span className="text-[9px] font-black uppercase text-green-600 dark:text-green-400 tracking-[0.15em] block mb-0.5">Ahorrás:</span>
-              <div className="text-lg font-black text-green-600 dark:text-green-400 tracking-tighter font-mono">${format(Math.round(potentialSavings))}</div>
-            </div>
-          </div>
 
-          <div className="border-t border-neutral-100 dark:border-neutral-800 pt-2 text-center">
-            <span className="text-[10px] font-black uppercase text-neutral-500 tracking-[0.15em] block mb-1">Total Estimado en Lista:*</span>
-            <div className="text-4xl font-black text-black dark:text-white tracking-tighter font-mono leading-none">
-              ${format(Math.round(best.totalChango))}
+            <div className="border-t border-neutral-100 dark:border-neutral-800 pt-2 w-full mt-2">
+              <span className="text-[10px] font-black uppercase text-neutral-500 tracking-[0.15em] block mb-1">Total Estimado:*</span>
+              <div className="text-4xl font-black text-black dark:text-white tracking-tighter font-mono leading-none">
+                ${format(Math.round(best.totalChango))}
+              </div>
             </div>
           </div>
 
@@ -150,53 +155,38 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
           </div>
 
           <div className="space-y-2 pt-1">
-            {paymentAdvice?.owned && (
-              <div className="flex items-center gap-2 text-left bg-green-500/5 dark:bg-green-500/10 p-2.5 rounded-lg border border-green-500/10">
-                <i className="fa-solid fa-circle-check text-green-500 text-xs"></i>
-                <p className="text-[10px] font-black uppercase text-black dark:text-white leading-tight">
-                  Con {paymentAdvice.owned.entidad_nombre} ahorrás hasta <span className="text-green-500">{paymentAdvice.owned.descuento}%</span>*
-                </p>
-              </div>
-            )}
-            
-            {paymentAdvice?.recommend && (
-              <a 
-                href={paymentAdvice.recommend.link_referido} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex items-center gap-3 text-left p-2.5 rounded-lg border-2 border-dashed border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 transition-all group"
-              >
-                <div className="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20">
-                  <i className="fa-solid fa-rocket text-[10px]"></i>
+            <div className="flex gap-2">
+              {paymentAdvice?.owned && (
+                <div className="flex-1 flex items-center gap-2 text-left bg-green-500/5 dark:bg-green-500/10 p-2.5 rounded-lg border border-green-500/10">
+                  <i className="fa-solid fa-circle-check text-green-500 text-xs"></i>
+                  <p className="text-[10px] font-black uppercase text-black dark:text-white leading-tight">
+                    Con {paymentAdvice.owned.entidad_nombre} ahorrás hasta <span className="text-green-500">{paymentAdvice.owned.descuento}%</span>*
+                  </p>
                 </div>
-                <div>
-                   <p className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 leading-tight">🚀 ¡Súper Oportunidad!</p>
-                   <p className="text-[10px] font-bold text-neutral-600 dark:text-neutral-300 uppercase leading-none">Sacá la {paymentAdvice.recommend.entidad_nombre} y ahorrá {paymentAdvice.recommend.descuento}%*</p>
-                </div>
-              </a>
-            )}
+              )}
+              
+              {paymentAdvice?.recommend && (
+                <a 
+                  href={paymentAdvice.recommend.link_referido} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex-1 flex items-center gap-3 text-left p-2.5 rounded-lg border-2 border-dashed border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 transition-all group"
+                >
+                  <div className="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20">
+                    <i className="fa-solid fa-coins text-sm"></i>
+                  </div>
+                  <div>
+                     <p className="text-base font-black uppercase text-indigo-600 dark:text-indigo-400 leading-tight">¡Súper Ahorro!</p>
+                     <p className="text-[10px] font-bold text-neutral-600 dark:text-neutral-300 uppercase leading-none">Sacá la {paymentAdvice.recommend.entidad_nombre} y ahorrá {paymentAdvice.recommend.descuento}%*</p>
+                  </div>
+                </a>
+              )}
+            </div>
+            <p className="text-[8px] text-neutral-500 dark:text-neutral-400 text-center pt-2">
+              *Valores estimados. La aplicación de beneficios y el precio final en caja dependen exclusivamente de las condiciones vigentes de cada comercio y entidad emisora.
+            </p>
           </div>
 
-          {canSave && onSaveCart && (
-            <div className="mt-2 border-t border-neutral-100 dark:border-neutral-800 pt-3">
-              <div className="flex gap-2">
-                <input 
-                  type="text" 
-                  placeholder="NOMBRE DE TU LISTA..." 
-                  value={newCartName}
-                  onChange={e => setNewCartName(e.target.value.toUpperCase())}
-                  className="flex-1 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-2.5 rounded-lg text-[10px] font-bold outline-none dark:text-white focus:ring-1 ring-black dark:ring-white"
-                />
-                <button 
-                  disabled={!newCartName}
-                  onClick={() => { onSaveCart(newCartName); setNewCartName(''); }}
-                  className="px-4 bg-black dark:bg-white text-white dark:text-black rounded-lg text-[10px] font-black uppercase disabled:opacity-30 transition-opacity"
-                >
-                  Guardar
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -204,10 +194,10 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
         <div className="px-1">
           <button 
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full flex items-center justify-between text-[10px] font-black text-neutral-500 dark:text-neutral-400 uppercase tracking-[0.2em] py-1.5 hover:text-black dark:hover:text-white transition-colors"
+            className="w-full flex items-center justify-between text-xs text-black dark:text-white uppercase tracking-tight py-1.5"
           >
             <span>Otros mercados ({others.length})</span>
-            <i className={`fa-solid fa-chevron-${isExpanded ? 'up' : 'down'} transition-transform text-[8px]`}></i>
+            <i className={`fa-solid fa-chevron-${isExpanded ? 'up' : 'down'} transition-transform text-xs`}></i>
           </button>
           
           {isExpanded && (
@@ -225,6 +215,59 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
           )}
         </div>
       )}
+
+      <div className="px-1 mt-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <h4 className="text-xs text-black dark:text-white uppercase tracking-tight">
+              Mis Listas
+            </h4>
+            {canSave && !showSaveInput && (
+              <button
+                onClick={() => setShowSaveInput(true)}
+                className="w-5 h-5 bg-black dark:bg-white text-white dark:text-black rounded-md flex items-center justify-center"
+              >
+                <i className="fa-solid fa-plus text-[9px]"></i>
+              </button>
+            )}
+          </div>
+        </div>
+        {showSaveInput && onSaveCart && (
+          <div className="mt-2 flex gap-2">
+            <input
+              type="text"
+              placeholder="NOMBRE DE TU LISTA..."
+              value={newCartName}
+              onChange={(e) => setNewCartName(e.target.value.toUpperCase())}
+              className="flex-1 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-2.5 rounded-lg text-[10px] font-bold outline-none dark:text-white focus:ring-1 ring-black dark:ring-white"
+            />
+            <button
+              disabled={!newCartName}
+              onClick={() => {
+                onSaveCart(newCartName);
+                setNewCartName('');
+                setShowSaveInput(false);
+              }}
+              className="px-4 bg-black dark:bg-white text-white dark:text-black rounded-lg text-[10px] font-black uppercase disabled:opacity-30 transition-opacity"
+            >
+              Guardar
+            </button>
+          </div>
+        )}
+        <div className="mt-2 flex flex-wrap gap-2">
+          {savedCarts.map((cart, index) => (
+            <div key={index} className="flex justify-between items-center p-2 bg-neutral-50 dark:bg-neutral-900 rounded-lg">
+              <button onClick={() => onLoadCart(index)} className="text-sm font-bold">{cart.name}</button>
+              <button
+                onClick={() => onDeleteCart(cart.id)}
+                className="ml-2 text-red-500"
+              >
+                <i className="fa-solid fa-trash text-xs"></i>
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

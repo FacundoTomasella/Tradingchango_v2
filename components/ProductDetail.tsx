@@ -16,7 +16,6 @@ interface ProductDetailProps {
 const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFavoriteToggle, isFavorite, products, theme }) => {
   const [history, setHistory] = useState<PriceHistory[]>([]);
   const [days, setDays] = useState(7);
-  const [isPricesOpen, setIsPricesOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const product = products.find(p => p.id === productId);
@@ -72,6 +71,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
     
     return { minPrice: min, minStore: winner, avgPrice: avg };
   }, [product]);
+
+  const minStoreUrl = useMemo(() => {
+    if (!product || !minStore) return '#';
+    const storeData = STORES.find(s => s.name === minStore);
+    return storeData ? (product as any)[storeData.url] || '#' : '#';
+  }, [product, minStore]);
 
   const { chartData, percentageChange, isTrendUp } = useMemo(() => {
     if (!history.length) return { chartData: [], percentageChange: 0, isTrendUp: false };
@@ -139,9 +144,14 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
               </h1>
               
               <div className="flex flex-col">
-                <span className="text-[9px] font-black text-neutral-500 uppercase tracking-widest mb-0.5">
-                  Mejor precio hoy en {minStore}
-                </span>
+                <div className="flex items-baseline gap-2 mb-0.5">
+                  <span className="text-[10px] font-black text-black dark:text-white uppercase tracking-widest">
+                    Mejor precio hoy en {minStore}
+                  </span>
+                  <a href={minStoreUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600">
+                    <i className="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                  </a>
+                </div>
                 <div className="flex items-end gap-2">
                   <div className="flex items-baseline gap-0.5">
                     <span className="text-sm font-bold text-black dark:text-white">$</span>
@@ -149,9 +159,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
                       {format(minPrice)}
                     </span>
                   </div>
-                  <div className="flex items-baseline gap-1 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 px-2 py-1 rounded-md mb-0.5 shadow-sm">
-                    <span className="text-[8px] font-bold text-neutral-400 uppercase">Promedio:</span>
-                    <span className="text-[11px] font-black text-neutral-600 dark:text-neutral-400 font-mono">$ {format(Math.round(avgPrice))}</span>
+                  <div className="flex items-baseline gap-1 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 px-2 py-1 rounded-md mb-0.5 shadow-sm">
+                    <span className="text-[8px] font-bold text-neutral-500 dark:text-neutral-400 uppercase">Promedio:</span>
+                    <span className="text-[11px] font-black text-black dark:text-white font-mono">$ {format(Math.round(avgPrice))}</span>
                   </div>
                 </div>
               </div>
@@ -165,7 +175,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
               <button 
                 key={d} 
                 onClick={() => setDays(d)}
-                className={`min-w-[42px] py-1.5 px-1 text-[8px] font-black rounded-md transition-all border ${days === d ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white' : 'bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border-neutral-100 dark:border-neutral-800'}`}
+                className={`min-w-[48px] py-2 px-2 text-[9px] font-black rounded-md transition-all border ${days === d ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white' : 'bg-neutral-50 dark:bg-neutral-900 text-neutral-500 border-neutral-100 dark:border-neutral-800'}`}
               >
                 {d < 30 ? `${d}D` : d < 365 ? `${Math.floor(d / 30)}M` : '1Y'}
               </button>
@@ -185,7 +195,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
             <div className="h-44 md:h-52 w-full relative">
               {chartData.length > 1 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -35, bottom: 0 }}>
+                  <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor={trendColor} stopOpacity={0.1}/>
@@ -199,8 +209,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
                         if (active && payload && payload.length) {
                           const data = payload[0].payload;
                           return (
-                            <div className="bg-white dark:bg-neutral-900 p-2 rounded-lg shadow-xl border border-neutral-100 dark:border-neutral-800">
-                              <p className="text-[12px] font-mono font-black text-black dark:text-white">${format(data.price)}</p>
+                            <div className="bg-white dark:bg-neutral-900 p-2 rounded-lg shadow-xl border border-neutral-100 dark:border-neutral-800 text-center">
+                              <p className="text-[9px] font-bold text-neutral-500 dark:text-neutral-400 uppercase">{data.date.replace('.', '')}</p>
+                              <div className="flex items-baseline justify-center gap-1.5">
+                                <span className="text-[9px] font-bold text-black dark:text-white uppercase">{data.store}</span>
+                                <span className="text-[9px] font-bold text-black dark:text-white">${format(data.price)}</span>
+                              </div>
                             </div>
                           );
                         }
@@ -219,26 +233,98 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
           </div>
 
           <div className="w-full border border-neutral-100 dark:border-neutral-800 rounded-lg overflow-hidden mb-4">
-            <button onClick={() => setIsPricesOpen(!isPricesOpen)} className="w-full flex items-center justify-between p-2.5 bg-neutral-50 dark:bg-neutral-900/50">
+            <div className="w-full flex items-center justify-between p-2.5 bg-neutral-50 dark:bg-neutral-900/50">
               <span className="text-[9px] font-black uppercase tracking-[0.1em] text-black dark:text-white">Comparativa por Mercado</span>
-              <i className={`fa-solid fa-chevron-${isPricesOpen ? 'up' : 'down'} text-neutral-500 text-[9px]`}></i>
-            </button>
-            {isPricesOpen && (
-              <div className="px-3 py-2 space-y-2 bg-white dark:bg-neutral-950">
-                {STORES.map((s) => {
-                  const price = (product as any)[s.key];
-                  if (!price || price <= 0) return null;
-                  return (
-                    <div key={s.name} className="flex items-center justify-between py-1.5 border-b border-neutral-50 dark:border-neutral-900 last:border-0">
-                      <span className="text-[9px] font-black text-neutral-500 uppercase">{s.name}</span>
-                      <span className={`text-sm font-mono font-black ${price === minPrice ? 'text-green-500' : 'text-black dark:text-white'}`}>
+            </div>
+            <div className="px-3 py-2 space-y-2 bg-white dark:bg-neutral-950">
+              {STORES.map((s) => {
+                const price = (product as any)[s.key];
+                const url = (product as any)[s.url];
+                const ofertaGondola = (product as any).oferta_gondola;
+                const storeKey = s.key.substring(2);
+                const promo = ofertaGondola?.[storeKey]?.etiqueta;
+                if (!price || price <= 0) return null;
+                
+                const storeColors: { [key: string]: string } = {
+                  COTO: 'bg-red-500',
+                  CARREFOUR: 'bg-blue-500',
+                  DIA: 'bg-red-500',
+                  JUMBO: 'bg-green-500',
+                  'MAS ONLINE': 'bg-green-500',
+                };
+
+                const priceClassName = `text-sm font-mono font-black ${price === minPrice ? 'text-green-500' : 'text-black dark:text-white'}`;
+
+                return (
+                  <div key={s.name} className="flex items-center justify-between py-1.5 border-b border-neutral-50 dark:border-neutral-900 last:border-0">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${storeColors[s.name]}`}></span>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-[11px] font-black text-black dark:text-white uppercase">{s.name}</span>
+                        {promo && <span className="bg-green-600 text-white text-[8px] font-[900] px-1 py-0.5 rounded-[1px] uppercase leading-none font-sans">{promo}</span>}
+                      </div>
+                    </div>
+                    {url ? (
+                      <a href={url} target="_blank" rel="noopener noreferrer" className={priceClassName}>
+                        ${format(price)}
+                      </a>
+                    ) : (
+                      <span className={priceClassName}>
                         ${format(price)}
                       </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <div className="mt-6">
+              <h2 className="text-sm font-bold text-black dark:text-white mb-2">Comparativa por Mercado</h2>
+              {STORES.map(s => {
+                const price = (product as any)[s.key];
+                const url = (product as any)[s.url];
+                const ofertaGondola = (product as any).oferta_gondola;
+                const storeKey = s.key.substring(2);
+                const promo = ofertaGondola?.[storeKey]?.etiqueta;
+                if (!price || price <= 0) return null;
+                
+                const storeColors: { [key: string]: string } = {
+                  COTO: 'bg-red-500',
+                  CARREFOUR: 'bg-blue-500',
+                  DIA: 'bg-red-500',
+                  JUMBO: 'bg-green-500',
+                  'MAS ONLINE': 'bg-green-500',
+                };
+
+                const priceClassName = `text-sm font-mono font-black ${price === minPrice ? 'text-green-500' : 'text-black dark:text-white'}`;
+
+                return (
+                  <div key={s.name} className="flex items-center justify-between py-1.5 border-b border-neutral-50 dark:border-neutral-900 last:border-0">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${storeColors[s.name]}`}></span>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-[11px] font-black text-black dark:text-white uppercase">{s.name}</span>
+                        {promo && <span className="bg-green-600 text-white text-[8px] font-[900] px-1 py-0.5 rounded-[1px] uppercase leading-none font-sans">{promo}</span>}
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                    {url ? (
+                      <a href={url} target="_blank" rel="noopener noreferrer" className={priceClassName}>
+                        ${format(price)}
+                      </a>
+                    ) : (
+                      <span className={priceClassName}>
+                        ${format(price)}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-4 text-center">
+              Analizá los precios, tendencias, y compará antes de comprar
+            </p>
           </div>
 
           <div className="w-full sticky bottom-0 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-md pb-2 pt-1">

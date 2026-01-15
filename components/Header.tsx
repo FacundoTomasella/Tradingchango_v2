@@ -59,9 +59,9 @@ const Header: React.FC<HeaderProps> = ({
 
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-4 mr-2">
-            <button onClick={() => onNavigate('about')} className="text-[11px] font-bold uppercase tracking-widest text-neutral-500 hover:text-black dark:hover:text-white transition-colors">Acerca de</button>
-            <button onClick={() => onNavigate('terms')} className="text-[11px] font-bold uppercase tracking-widest text-neutral-500 hover:text-black dark:hover:text-white transition-colors">Términos</button>
-            <button onClick={() => onNavigate('contact')} className="text-[11px] font-bold uppercase tracking-widest text-neutral-500 hover:text-black dark:hover:text-white transition-colors">Contacto</button>
+            <button onClick={() => onNavigate('about')} className="text-[11px] font-bold uppercase tracking-widest text-black dark:text-white hover:opacity-70 transition-colors">Acerca de</button>
+            <button onClick={() => onNavigate('terms')} className="text-[11px] font-bold uppercase tracking-widest text-black dark:text-white hover:opacity-70 transition-colors">Términos</button>
+            <button onClick={() => onNavigate('contact')} className="text-[11px] font-bold uppercase tracking-widest text-black dark:text-white hover:opacity-70 transition-colors">Contacto</button>
           </div>
 
           <div className="relative md:hidden" ref={menuRef}>
@@ -109,13 +109,13 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex gap-2">
           <button 
             onClick={() => setTrendFilter(trendFilter === 'down' ? null : 'down')} 
-            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-[11px] font-[800] uppercase border transition-all ${trendFilter === 'down' ? 'bg-green-500 text-white border-green-500 shadow-lg shadow-green-500/20' : 'bg-white dark:bg-black text-green-500 border-neutral-100 dark:border-neutral-900'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-[11px] font-[800] uppercase border transition-all ${trendFilter === 'down' ? 'bg-green-600 text-white border-green-600 shadow-lg shadow-green-600/20' : 'bg-white dark:bg-black text-green-600 border-neutral-100 dark:border-neutral-900'}`}
           >
             <i className="fa-solid fa-arrow-trend-down"></i> Precios bajando
           </button>
           <button 
             onClick={() => setTrendFilter(trendFilter === 'up' ? null : 'up')} 
-            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-[11px] font-[800] uppercase border transition-all ${trendFilter === 'up' ? 'bg-red-500 text-white border-red-500 shadow-lg shadow-red-500/20' : 'bg-white dark:bg-black text-red-500 border-neutral-100 dark:border-neutral-900'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-[11px] font-[800] uppercase border transition-all ${trendFilter === 'up' ? 'bg-red-600 text-white border-red-600 shadow-lg shadow-red-600/20' : 'bg-white dark:bg-black text-red-600 border-neutral-100 dark:border-neutral-900'}`}
           >
             <i className="fa-solid fa-arrow-trend-up"></i> Precios subiendo
           </button>
@@ -125,7 +125,7 @@ const Header: React.FC<HeaderProps> = ({
       {showHero && (
         <div className="mt-8 text-center px-4 animate-in fade-in duration-500">
           <h2 className="text-[22px] font-[800] text-black dark:text-white leading-none tracking-tight font-sans">Los precios del super como nunca los viste</h2>
-          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-500 font-medium tracking-tight">Analizá tendencias y ahorrá en cada compra.</p>
+          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-500 font-medium tracking-tight">Analizá los precios, tendencias, y compará antes de comprar.</p>
         </div>
       )}
     </header>

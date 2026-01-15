@@ -80,7 +80,7 @@ const ProductList: React.FC<ProductListProps> = ({
   }
 
   return (
-    <div className="divide-y divide-neutral-100 dark:divide-neutral-900 border-b border-neutral-100 dark:divide-neutral-900">
+    <div className="divide-neutral-100 dark:divide-neutral-900 border-neutral-100 dark:divide-neutral-900">
       {products.map((p) => {
         const fav = isFavorite(p.id);
         const purchased = purchasedItems?.has(p.id);
@@ -91,7 +91,7 @@ const ProductList: React.FC<ProductListProps> = ({
           <div 
             key={p.id} 
             onClick={() => onProductClick(p.id)}
-            className={`flex items-center justify-between px-4 py-2 bg-white dark:bg-black hover:bg-neutral-50 dark:hover:bg-neutral-900/30 cursor-pointer transition-all ${purchased ? 'opacity-30 grayscale' : ''}`}
+            className={`flex items-center justify-between px-3 py-2 bg-white dark:bg-black hover:bg-neutral-50 dark:hover:bg-neutral-900/30 cursor-pointer transition-all ${purchased ? 'opacity-30 grayscale' : ''}`}
           >
             <div className="flex items-center gap-3 shrink-0">
                {isCartView && (
@@ -102,24 +102,24 @@ const ProductList: React.FC<ProductListProps> = ({
                    {purchased && <i className="fa-solid fa-check text-[10px]"></i>}
                  </button>
                )}
-               <div className="w-10 h-10 rounded-lg bg-white border border-neutral-100 flex items-center justify-center overflow-hidden shrink-0">
-                  <img src={p.imagen_url || 'https://via.placeholder.com/50?text=N/A'} alt={p.nombre} className="w-full h-full object-contain p-0.5" />
+               <div className="w-14 h-14 rounded-lg bg-white border border-neutral-100 flex items-center justify-center overflow-hidden shrink-0">
+                  <img src={p.imagen_url || 'https://via.placeholder.com/50?text=N/A'} alt={p.nombre} className="w-full h-full object-contain p-1" />
                </div>
             </div>
 
-            <div className="flex-1 flex items-center justify-between pr-3 min-w-0 ml-3">
+            <div className="flex-1 flex items-center justify-between pr-2 min-w-0 ml-3">
               <div className="flex flex-col gap-0 min-w-0">
                 <div className="flex items-center flex-wrap gap-1">
                   <span className={`font-[800] text-black dark:text-white text-[14px] tracking-tight uppercase font-mono leading-none ${purchased ? 'line-through' : ''}`}>
                     {p.ticker || p.nombre.substring(0, 5).toUpperCase()}
                   </span>
                   {badges && !purchased && badges.map((b, idx) => (
-                    <span key={idx} className="bg-green-500 text-white text-[7px] font-[900] px-1 py-0.5 rounded-[1px] uppercase leading-none font-sans">
+                    <span key={idx} className="bg-green-600 text-white text-[8px] font-[900] px-1 py-0.5 rounded-[1px] uppercase leading-none font-sans">
                       {b}
                     </span>
                   ))}
                 </div>
-                <span className={`text-[12px] font-medium text-neutral-700 dark:text-neutral-400 line-clamp-1 font-sans mt-0.5 ${purchased ? 'line-through' : ''}`}>
+                <span className={`text-[14px] font-medium text-neutral-700 dark:text-neutral-400 line-clamp-1 font-sans mt-0.5 ${purchased ? 'line-through' : ''}`}>
                   {p.nombre}
                 </span>
               </div>
@@ -154,7 +154,7 @@ const ProductList: React.FC<ProductListProps> = ({
                   }}
                   className={`transition-all flex items-center justify-center active:scale-90 p-1.5 ${fav ? 'text-star-gold' : 'text-neutral-300 dark:text-neutral-800'}`}
                 >
-                  <i className="fa-solid fa-cart-shopping text-[16px]"></i>
+                  <i className="fa-solid fa-cart-shopping text-[22px]"></i>
                 </button>
               )}
             </div>

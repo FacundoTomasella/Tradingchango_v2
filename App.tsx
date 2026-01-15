@@ -168,8 +168,8 @@ const App: React.FC = () => {
     let diff = 0, tc = 'text-neutral-500', icon = '-', isUp = false, isDown = false;
     if (h > 0) {
       diff = ((min - h) / h) * 100;
-      if (diff > 0.1) { tc = 'text-red-500'; icon = '▲'; isUp = true; }
-      else if (diff < -0.1) { tc = 'text-green-500'; icon = '▼'; isDown = true; }
+      if (diff > 0.1) { tc = 'text-red-600'; icon = '▲'; isUp = true; }
+      else if (diff < -0.1) { tc = 'text-green-600'; icon = '▼'; isDown = true; }
     }
     return { min, spread: Math.abs(diff).toFixed(1), trendClass: tc, icon, isUp, isDown };
   };
@@ -209,6 +209,23 @@ const App: React.FC = () => {
     });
   };
 
+  const handleFavoriteChangeInCart = (id: number, delta: number) => {
+    setFavorites(prev => {
+      const newQty = (prev[id] || 1) + delta;
+      if (newQty <= 0) {
+        const next = { ...prev };
+        delete next[id];
+        setPurchasedItems(p => {
+          const newP = new Set(p);
+          newP.delete(id);
+          return newP;
+        });
+        return next;
+      }
+      return { ...prev, [id]: newQty };
+    });
+  };
+
   const togglePurchased = (id: number) => {
     const newPurchased = new Set(purchasedItems);
     if (newPurchased.has(id)) newPurchased.delete(id);
@@ -233,6 +250,17 @@ const App: React.FC = () => {
     navigateTo('favs');
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
+    setFavorites({});
+    setSavedCarts([]);
+    setPurchasedItems(new Set());
+    setIsAuthOpen(false);
+    navigateTo('home');
+  };
+
   if (loading && products.length === 0) return <div className="min-h-screen flex items-center justify-center dark:bg-black dark:text-white font-mono text-[11px] uppercase tracking-[0.2em]">Analizando precios...</div>;
 
   return (
@@ -250,7 +278,7 @@ const App: React.FC = () => {
         showHero={currentTab === 'home' && !searchTerm && !trendFilter}
         onNavigate={navigateTo} currentTab={currentTab}
       />
-      <main className="pb-24">
+      <main className="pb-16">
         {['home', 'carnes', 'verdu', 'varios', 'favs'].includes(currentTab) ? (
           <>
             {currentTab === 'favs' && filteredProducts.length > 0 && (
@@ -261,6 +289,9 @@ const App: React.FC = () => {
                 userMemberships={profile?.membresias} 
                 onSaveCart={handleSaveCurrentCart}
                 canSave={!!user && savedCarts.length < 2}
+                savedCarts={savedCarts}
+                onLoadCart={handleLoadSavedCart}
+                onDeleteCart={handleDeleteSavedCart}
               />
             )}
             <ProductList 
@@ -270,7 +301,7 @@ const App: React.FC = () => {
               isFavorite={id => !!favorites[id]}
               isCartView={currentTab === 'favs'} 
               quantities={favorites}
-              onUpdateQuantity={(id, d) => setFavorites(p => ({...p, [id]: Math.max(1, (p[id]||1)+d)}))}
+              onUpdateQuantity={handleFavoriteChangeInCart}
               searchTerm={searchTerm}
               purchasedItems={purchasedItems}
               onTogglePurchased={togglePurchased}
@@ -291,7 +322,7 @@ const App: React.FC = () => {
         onClose={() => setIsAuthOpen(false)} 
         user={user} 
         profile={profile} 
-        onSignOut={() => setUser(null)} 
+        onSignOut={handleSignOut} 
         onProfileUpdate={() => loadData(user)}
         savedCarts={savedCarts}
         onSaveCart={handleSaveCurrentCart}

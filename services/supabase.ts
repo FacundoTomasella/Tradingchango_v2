@@ -113,6 +113,66 @@ export const getSavedCartData = async (userId: string): Promise<{ active: Record
   return items || { active: {}, saved: [] };
 };
 
+// Guarda un carrito individual
+export const saveCart = async (userId: string, name: string, items: Record<number, number>) => {
+  const { data, error } = await supabase
+    .from('carritos_guardados')
+    .insert({ 
+      user_id: userId, 
+      name,
+      items, 
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+// Obtiene todos los carritos guardados de un usuario
+export const getSavedCarts = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('carritos_guardados')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
+};
+
+// Obtiene un carrito compartido por su ID
+export const getSharedCart = async (cartId: string) => {
+  const { data, error } = await supabase
+    .from('carritos_guardados')
+    .select('items, name')
+    .eq('id', cartId)
+    .eq('is_public', true)
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+// Actualiza un carrito (para compartir, etc.)
+export const updateCart = async (cartId: string, updates: Record<string, any>) => {
+  const { data, error } = await supabase
+    .from('carritos_guardados')
+    .update(updates)
+    .eq('id', cartId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+// Elimina un carrito por su ID
+export const deleteCart = async (cartId: string) => {
+  const { error } = await supabase
+    .from('carritos_guardados')
+    .delete()
+    .eq('id', cartId);
+  if (error) throw error;
+};
+
+
 export const getCatalogoMembresias = async () => {
   const { data, error } = await supabase.from('catalogo_membresias').select('*');
   if (error) throw error;
