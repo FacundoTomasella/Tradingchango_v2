@@ -86,8 +86,13 @@ const AuthModal: React.FC<AuthModalProps> = ({
     return groups;
   }, [catalogo]);
 
+  const isProValid = useMemo(() => {
+    if (!profile || profile.subscription !== 'pro') return false;
+    return profile.subscription_end ? new Date(profile.subscription_end) > new Date() : false;
+  }, [profile]);
+
   const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
+      e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(null);
@@ -175,9 +180,8 @@ const AuthModal: React.FC<AuthModalProps> = ({
             </button>
             <button type="button" onClick={() => setView('welcome')} className="w-full text-[10px] font-black text-neutral-400 uppercase mt-4">Volver</button>
           </form>
-        )}
-
-        {view === 'profile' && user && (
+        )} 
+               {view === 'profile' && user && (
           <div className="text-center animate-in fade-in duration-300">
             <div className="w-14 h-14 bg-neutral-100 dark:bg-neutral-900 rounded-xl flex items-center justify-center text-xl mx-auto mb-4 text-neutral-500 border border-neutral-200 dark:border-neutral-800">
               <i className="fa-solid fa-user-astronaut"></i>
@@ -185,7 +189,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
             <h4 className="font-black dark:text-white text-xl mb-1 truncate tracking-tighter uppercase">
               ¡Hola, {profile?.nombre || user.email.split('@')[0]}!
             </h4>
-                <p className="text-[9px] font-black text-green-500 uppercase tracking-widest mb-6"> Nivel: {profile?.subscription} </p>            
+                <p className={`text-[9px] font-black uppercase tracking-widest mb-6 ${isProValid ? 'text-green-500' : 'text-neutral-400'}`}> Nivel: {isProValid ? 'PRO' : 'FREE'} </p>            
             <div className="space-y-2.5">
               <button onClick={() => setView('mis_changos')} className="w-full bg-neutral-50 dark:bg-neutral-900 p-4 rounded-xl text-left flex items-center justify-between border border-neutral-100 dark:border-neutral-800 hover:border-black dark:hover:border-white transition-all">
                 <div className="flex items-center gap-3">

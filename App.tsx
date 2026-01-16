@@ -113,7 +113,27 @@ const App: React.FC = () => {
       setConfig(configData || {});
 
       if (sessionUser) {
-        const prof = await getProfile(sessionUser.id);
+        let prof = await getProfile(sessionUser.id); // Cambié const por let para poder editarlo
+
+        // --- INICIO CAMBIO AQUÍ: VERIFICACIÓN Y ACTUALIZACIÓN FÍSICA ---
+        if (prof && prof.subscription === 'pro' && prof.subscription_end) {
+          const expiryDate = new Date(prof.subscription_end);
+          const today = new Date();
+
+          if (expiryDate < today) {
+            // 1. Actualizar físicamente la base de datos
+            await supabase
+              .from('perfiles')
+              .update({ subscription: 'free' })
+              .eq('id', sessionUser.id);
+            
+            // 2. Actualizar el objeto local para que la App ya lo vea como FREE
+            prof = { ...prof, subscription: 'free' };
+            console.log("Suscripción expirada. Usuario actualizado a FREE.");
+          }
+        }
+        // --- FIN CAMBIO ---
+
         setProfile(prof);
         const cartData = await getSavedCartData(sessionUser.id);
         if (cartData) {
@@ -121,6 +141,7 @@ const App: React.FC = () => {
           setSavedCarts(cartData.saved || []);
         }
       }
+      
       const day = new Date().getDay();
       const benefitData = await getBenefits(day);
       setBenefits(benefitData);
