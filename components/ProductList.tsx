@@ -73,7 +73,7 @@ const ProductList: React.FC<ProductListProps> = ({
         <div className="w-14 h-14 bg-neutral-100 dark:bg-neutral-900 rounded-2xl flex items-center justify-center text-neutral-500 mb-4 text-2xl">
           <i className="fa-solid fa-cart-shopping"></i>
         </div>
-        <h3 className="text-base font-black text-neutral-900 dark:text-neutral-100 uppercase tracking-tighter">Tu lista está vacía</h3>
+        <h3 className="text-base font-black text-neutral-900 dark:text-neutral-100 uppercase tracking-tighter">Tu chango está vacío</h3>
         <p className="text-[12px] text-neutral-500 dark:text-neutral-500 font-medium max-w-[200px]">Agregá productos para empezar a ahorrar.</p>
       </div>
     );
@@ -102,7 +102,7 @@ const ProductList: React.FC<ProductListProps> = ({
                    {purchased && <i className="fa-solid fa-check text-[10px]"></i>}
                  </button>
                )}
-               <div className="w-14 h-14 rounded-lg bg-white border border-neutral-100 flex items-center justify-center overflow-hidden shrink-0">
+               <div className="w-16 h-16 rounded-lg bg-white border border-neutral-100 flex items-center justify-center overflow-hidden shrink-0">
                   <img src={p.imagen_url || 'https://via.placeholder.com/50?text=N/A'} alt={p.nombre} className="w-full h-full object-contain p-1" />
                </div>
             </div>
@@ -110,7 +110,7 @@ const ProductList: React.FC<ProductListProps> = ({
             <div className="flex-1 flex items-center justify-between pr-2 min-w-0 ml-3">
               <div className="flex flex-col gap-0 min-w-0">
                 <div className="flex items-center flex-wrap gap-1">
-                  <span className={`font-[800] text-black dark:text-white text-[14px] tracking-tight uppercase font-mono leading-none ${purchased ? 'line-through' : ''}`}>
+                  <span className={`font-[800] text-black dark:text-white text-[16px] tracking-tight uppercase font-mono leading-none ${purchased ? 'line-through' : ''}`}>
                     {p.ticker || p.nombre.substring(0, 5).toUpperCase()}
                   </span>
                   {badges && !purchased && badges.map((b, idx) => (
@@ -119,16 +119,19 @@ const ProductList: React.FC<ProductListProps> = ({
                     </span>
                   ))}
                 </div>
-                <span className={`text-[14px] font-medium text-neutral-700 dark:text-neutral-400 line-clamp-1 font-sans mt-0.5 ${purchased ? 'line-through' : ''}`}>
+                <span className={`text-[16px] font-medium text-neutral-700 dark:text-neutral-400 line-clamp-1 font-sans mt-0.5 ${purchased ? 'line-through' : ''}`}>
                   {p.nombre}
                 </span>
               </div>
 
               <div className="text-right flex flex-col items-end min-w-[80px]">
-                <span className="font-mono font-[800] text-black dark:text-white text-[15px] leading-none">
+                <span className="font-mono font-[800] text-black dark:text-white text-[17px] leading-none">
                   ${format(p.stats.min)}
                 </span>
-                <span className={`font-mono text-[10px] font-[700] mt-0.5 ${p.stats.trendClass} leading-none`}>
+                <span 
+                  className={`font-mono text-[12px] font-bold mt-0.5 ${p.stats.trendClass} leading-none`}
+                  style={{ transform: 'scale(1.05)' }}
+                >
                   {p.stats.icon} {p.stats.spread}%
                 </span>
               </div>
@@ -153,6 +156,7 @@ const ProductList: React.FC<ProductListProps> = ({
                     onFavoriteToggle(p.id);
                   }}
                   className={`transition-all flex items-center justify-center active:scale-90 p-1.5 ${fav ? 'text-star-gold' : 'text-neutral-300 dark:text-neutral-800'}`}
+                  style={{ transform: 'scale(0.95)' }}
                 >
                   <i className="fa-solid fa-cart-shopping text-[22px]"></i>
                 </button>
