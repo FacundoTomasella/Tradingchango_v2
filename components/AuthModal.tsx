@@ -111,6 +111,8 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 fecha_nacimiento: fechaNacimiento,
                 subscription: 'pro',           // Cambiado a 'pro' (en minúsculas por TypeScript)
                 subscription_end: '2027-01-01' // Agregamos la fecha de vencimiento
+          });
+}
         setSuccess(`¡Bienvenido ${nombre}! Tu cuenta está lista.`);
         setMode('login');
       } else {
