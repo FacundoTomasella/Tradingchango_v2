@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
-import { supabase, getProducts, getPriceHistory, getProfile, getConfig, getBenefits, getSavedCartData, saveCartData } from './services/supabase';
+import {
+  supabase, 
+  getProducts, 
+  getPriceHistory, 
+  getProfile, 
+  getConfig, 
+  getBenefits,
+  getSavedCarts, 
+  saveCart,
+  updateCart,
+  deleteCart
+} from './services/supabase';
 import { Product, PriceHistory, Profile, TabType, ProductStats, Benefit } from './types';
 import Header from './components/Header';
 import ProductList from './components/ProductList';
@@ -24,9 +35,12 @@ const App: React.FC = () => {
   const [trendFilter, setTrendFilter] = useState<'up' | 'down' | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authAction, setAuthAction] = useState<string | null>(null);
+  const [authMessage, setAuthMessage] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<Record<number, number>>({});
   const [purchasedItems, setPurchasedItems] = useState<Set<number>>(new Set());
   const [savedCarts, setSavedCarts] = useState<any[]>([]);
+  const [activeListId, setActiveListId] = useState<string | null>(null);
   const [showPwaPill, setShowPwaPill] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>(
@@ -101,82 +115,86 @@ const App: React.FC = () => {
   };
 
   const loadData = useCallback(async (sessionUser: User | null) => {
-    try {
-      setLoading(true);
-      const [prodData, histData, configData] = await Promise.all([
-        getProducts(),
-        getPriceHistory(7),
-        getConfig()
-      ]);
-      setProducts(prodData || []);
-      setHistory(histData || []);
-      setConfig(configData || {});
+  try {
+    setLoading(true);
+    const [prodData, histData, configData] = await Promise.all([
+      getProducts(),
+      getPriceHistory(7),
+      getConfig()
+    ]);
+    setProducts(prodData || []);
+    setHistory(histData || []);
+    setConfig(configData || {});
 
-      if (sessionUser) {
-        let prof = await getProfile(sessionUser.id); // Cambié const por let para poder editarlo
+    if (sessionUser) {
+      let prof = await getProfile(sessionUser.id);
 
-        // --- INICIO CAMBIO AQUÍ: VERIFICACIÓN Y ACTUALIZACIÓN FÍSICA ---
-        if (prof && prof.subscription === 'pro' && prof.subscription_end) {
-          const expiryDate = new Date(prof.subscription_end);
-          const today = new Date();
-
-          if (expiryDate < today) {
-            // 1. Actualizar físicamente la base de datos
-            await supabase
-              .from('perfiles')
-              .update({ subscription: 'free' })
-              .eq('id', sessionUser.id);
-            
-            // 2. Actualizar el objeto local para que la App ya lo vea como FREE
-            prof = { ...prof, subscription: 'free' };
-          }
-        }
-        // --- FIN CAMBIO ---
-
-        setProfile(prof);
-        const cartData = await getSavedCartData(sessionUser.id);
-        if (cartData) {
-          setFavorites(cartData.active || {});
-          setSavedCarts(cartData.saved || []);
+      if (prof && prof.subscription === 'pro' && prof.subscription_end) {
+        if (new Date(prof.subscription_end) < new Date()) {
+          await supabase.from('perfiles').update({ subscription: 'free' }).eq('id', sessionUser.id);
+          prof = { ...prof, subscription: 'free' };
         }
       }
+
+      setProfile(prof);
       
-      const day = new Date().getDay();
-      const benefitData = await getBenefits(day);
-      setBenefits(benefitData);
-      setLoading(false);
-    } catch (err: any) {
-      console.error("Error loading app data:", err);
-      setLoading(false);
+      // CAMBIO: Usamos getSavedCarts que es la que existe
+      const carts = await getSavedCarts(sessionUser.id);
+      setSavedCarts(carts || []);
+      
+      // Si tenés un carrito activo guardado en el perfil o en el primer elemento:
+      if (carts && carts.length > 0 && !activeListId) {
+        setFavorites(carts[0].items || {});
+        setActiveListId(carts[0].id);
+      }
     }
-  }, []);
+    
+    // const day = new Date().getDay();
+    // const benefitData = await getBenefits(day);
+    // setBenefits(benefitData || []);
+  } catch (err: any) {
+    console.error("Error loading app data:", err);
+  } finally {
+    setLoading(false);
+  }
+}, []); 
 
   useEffect(() => {
+    // 1. Obtener la sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       const sessionUser = session?.user ?? null;
       setUser(sessionUser);
       loadData(sessionUser);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+
+    // 2. Escuchar cambios en la autenticación (Corrección de nombres de variables)
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       const sessionUser = session?.user ?? null;
       setUser(sessionUser);
-      if (_event === 'SIGNED_IN') loadData(sessionUser);
-      else if (_event === 'SIGNED_OUT') { 
-        setProfile(null); 
-        setFavorites({}); 
+      
+      if (event === 'SIGNED_IN') {
+        loadData(sessionUser);
+      } else if (event === 'SIGNED_OUT') {
+        setProfile(null);
+        setFavorites({});
         setSavedCarts([]);
         setPurchasedItems(new Set());
+        setActiveListId(null); // Resetea la carpeta activa al cerrar sesión
       }
     });
-    return () => subscription.unsubscribe();
+
+    // 3. Limpiar la suscripción al desmontar
+    return () => authListener.subscription.unsubscribe();
   }, [loadData]);
 
   useEffect(() => {
-    if (user) {
-      const dataToSave = { active: favorites, saved: savedCarts };
-      saveCartData(user.id, dataToSave).catch(console.error);
+    if (user && activeListId) {
+      const timer = setTimeout(() => {
+        updateCart(activeListId, { items: favorites }).catch(console.error);
+      }, 500); // Debounce to avoid too many writes
+      return () => clearTimeout(timer);
     }
-  }, [favorites, savedCarts, user]);
+  }, [favorites, user, activeListId]);
 
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
@@ -193,10 +211,8 @@ const App: React.FC = () => {
     return { min, spread: Math.abs(diff).toFixed(1), trendClass: tc, icon, isUp, isDown };
   };
 
-  /** LOGICA DE SUSCRIPCION PRO **/
   const isPro = useMemo(() => {
     if (!profile || profile.subscription !== 'pro') return false;
-    // Comprueba si la fecha de vencimiento es posterior a hoy
     return profile.subscription_end ? new Date(profile.subscription_end) > new Date() : false;
   }, [profile]);
 
@@ -223,71 +239,86 @@ const App: React.FC = () => {
 
   const toggleFavorite = (id: number) => {
     if (!user) {
+      setAuthMessage('Debes iniciar sesión para guardar favoritos.');
       setIsAuthOpen(true);
       return;
     }
 
     const favoritesCount = Object.keys(favorites).length;
-
-    // APLICA EL LIMITE SI NO ES PRO
     if (!isPro && favoritesCount >= 5 && !favorites[id]) {
-      alert('Los usuarios FREE solo pueden tener hasta 5 productos en favoritos.');
+      alert('¡Límite alcanzado! Sé PRO para tener favoritos ilimitados.');
       return;
     }
-
-    setFavorites(prev => {
-      const next = { ...prev };
-      if (next[id]) {
-        delete next[id];
-        const newPurchased = new Set(purchasedItems);
-        newPurchased.delete(id);
-        setPurchasedItems(newPurchased);
-      } else {
-        next[id] = 1;
-      }
-      return next;
-    });
+    
+    const next = { ...favorites };
+    if (next[id]) delete next[id];
+    else next[id] = 1;
+    setFavorites(next);
   };
 
   const handleFavoriteChangeInCart = (id: number, delta: number) => {
-    setFavorites(prev => {
-      const newQty = (prev[id] || 1) + delta;
-      if (newQty <= 0) {
-        const next = { ...prev };
-        delete next[id];
-        setPurchasedItems(p => {
-          const newP = new Set(p);
-          newP.delete(id);
-          return newP;
-        });
-        return next;
-      }
-      return { ...prev, [id]: newQty };
-    });
+    const currentQty = favorites[id] || 0;
+    const newQty = currentQty + delta;
+
+    if (newQty <= 0) {
+      const next = { ...favorites };
+      delete next[id];
+      setFavorites(next);
+    } else {
+      setFavorites({ ...favorites, [id]: newQty });
+    }
   };
 
   const togglePurchased = (id: number) => {
-    const newPurchased = new Set(purchasedItems);
-    if (newPurchased.has(id)) newPurchased.delete(id);
-    else newPurchased.add(id);
-    setPurchasedItems(newPurchased);
+    const next = new Set(purchasedItems);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setPurchasedItems(next);
   };
 
-  const handleSaveCurrentCart = (name: string) => {
-    if (savedCarts.length >= 2) return;
-    setSavedCarts([...savedCarts, { name, items: { ...favorites }, date: new Date().toISOString() }]);
+  const handleSaveCurrentCart = async (name: string) => {
+    if (!user || !isPro) return;
+  
+    const limit = 2; // Límite de 2 listas para usuarios PRO
+    if (savedCarts.length >= limit) {
+      alert("Límite alcanzado. Solo puedes guardar hasta 2 listas.");
+      return;
+    }
+
+    try {
+      const newCart = await saveCart(user.id, name, favorites);
+      if (newCart) {
+        setSavedCarts(prev => [newCart, ...prev]);
+        setActiveListId(newCart.id);
+      }
+    } catch (err) {
+      console.error("Error al guardar la lista:", err);
+      alert("No se pudo guardar la lista");
+    }
   };
 
-  const handleDeleteSavedCart = (index: number) => {
-    const next = [...savedCarts];
-    next.splice(index, 1);
-    setSavedCarts(next);
+  const handleDeleteSavedCart = (id: string) => {
+    deleteCart(id).then(() => {
+      const next = savedCarts.filter(cart => cart.id !== id);
+      setSavedCarts(next);
+      if (activeListId === id) {
+        if (next.length > 0) {
+          handleLoadSavedCart(next[0]);
+        } else {
+          setActiveListId(null);
+          setFavorites({});
+        }
+      }
+    }).catch(console.error);
   };
 
-  const handleLoadSavedCart = (index: number) => {
-    setFavorites(savedCarts[index].items);
+  const handleLoadSavedCart = (cart: any) => {
+    setLoading(true);
+    setFavorites(cart.items || {});
+    setActiveListId(cart.id);
     setPurchasedItems(new Set());
     navigateTo('favs');
+    setLoading(false);
   };
 
   const handleSignOut = async () => {
@@ -297,6 +328,7 @@ const App: React.FC = () => {
     setFavorites({});
     setSavedCarts([]);
     setPurchasedItems(new Set());
+    setActiveListId(null);
     setIsAuthOpen(false);
     navigateTo('home');
   };
@@ -306,8 +338,12 @@ const App: React.FC = () => {
   return (
     <div className="max-w-screen-md mx-auto min-h-screen bg-white dark:bg-black shadow-2xl transition-colors font-sans pb-24">
       {showPwaPill && (
-        <div onClick={handleInstallClick} className="fixed bottom-[80px] left-1/2 -translate-x-1/2 z-[1000] bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-full flex items-center gap-2 shadow-2xl cursor-pointer">
-          <span className="text-[10px] font-[800] uppercase tracking-wider">Instalar App 🛒</span>
+        <div 
+          onClick={handleInstallClick} 
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[1000] bg-black dark:bg-white text-white dark:text-black px-6 py-3 rounded-full flex items-center gap-3 shadow-2xl cursor-pointer animate-in slide-in-from-bottom-10 duration-500"
+        >
+          <i className="fa-solid fa-download"></i>
+          <span className="text-sm font-bold uppercase tracking-wider">Instalá la app</span>
         </div>
       )}
       <Header 
@@ -329,10 +365,11 @@ const App: React.FC = () => {
                 benefits={benefits} 
                 userMemberships={profile?.membresias} 
                 onSaveCart={handleSaveCurrentCart}
-                canSave={!!user && savedCarts.length < 2}
+                canSave={!!user && isPro && savedCarts.length < 2}
                 savedCarts={savedCarts}
                 onLoadCart={handleLoadSavedCart}
                 onDeleteCart={handleDeleteSavedCart}
+                activeListId={activeListId}
               />
             )}
             <ProductList 
@@ -356,21 +393,37 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
+
       <BottomNav currentTab={currentTab} setCurrentTab={navigateTo} cartCount={Object.keys(favorites).length} />
-      {selectedProductId && <ProductDetail productId={selectedProductId} onClose={() => navigateTo(currentTab)} onFavoriteToggle={toggleFavorite} isFavorite={!!favorites[selectedProductId]} products={products} theme={theme} />}
-      {isAuthOpen && <AuthModal 
-        isOpen={isAuthOpen} 
-        onClose={() => setIsAuthOpen(false)} 
-        user={user} 
-        profile={profile} 
-        onSignOut={handleSignOut} 
-        onProfileUpdate={() => loadData(user)}
-        savedCarts={savedCarts}
-        onSaveCart={handleSaveCurrentCart}
-        onDeleteCart={handleDeleteSavedCart}
-        onLoadCart={handleLoadSavedCart}
-        currentActiveCartSize={Object.keys(favorites).length}
-      />}
+      
+      {selectedProductId && (
+        <ProductDetail 
+          productId={selectedProductId} 
+          onClose={() => navigateTo(currentTab)} 
+          onFavoriteToggle={toggleFavorite} 
+          isFavorite={!!favorites[selectedProductId]} 
+          products={products} 
+          theme={theme} 
+        />
+      )}
+
+      {isAuthOpen && (
+        <AuthModal 
+          isOpen={isAuthOpen} 
+          onClose={() => setIsAuthOpen(false)} 
+          user={user} 
+          profile={profile} 
+          onSignOut={handleSignOut} 
+          onProfileUpdate={() => loadData(user)}
+          action={authAction}
+          message={authMessage}
+          currentActiveCartSize={Object.keys(favorites).length}
+          savedCarts={savedCarts}
+          onSaveCart={handleSaveCurrentCart}
+          onDeleteCart={handleDeleteSavedCart}
+          onLoadCart={handleLoadSavedCart}
+        />
+      )}
       <Footer />
     </div>
   );

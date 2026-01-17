@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { Product, Benefit, UserMembership } from '../types';
 
@@ -10,11 +9,12 @@ interface CartSummaryProps {
   onSaveCart?: (name: string) => void;
   canSave: boolean;
   savedCarts: any[];
-  onLoadCart: (index: number) => void;
-  onDeleteCart: (index: number) => void;
+  onLoadCart: (cart: any) => void;
+  onDeleteCart: (id: string) => void;
+  activeListId: string | null;
 }
 
-const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, userMemberships = [], onSaveCart, canSave, savedCarts, onLoadCart, onDeleteCart }) => {
+const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, userMemberships = [], onSaveCart, canSave, savedCarts, onLoadCart, onDeleteCart, activeListId }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [newCartName, setNewCartName] = useState('');
   const [showSaveInput, setShowSaveInput] = useState(false);
@@ -122,7 +122,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
         <div className="flex flex-col gap-3 relative z-10">
           
           <div className="flex flex-col items-center gap-2 text-center">
-            <span className="text-black dark:text-white text-xs font-black uppercase tracking-[0.15em]">Mejor opción:</span>
+            <span className="text-black dark:text-white text-xs font-black uppercase tracking-[0.15em]">Tu Mejor opción</span>
             
             <div className="flex items-baseline justify-center gap-6 w-full">
               <h2 className="text-xl font-black text-black dark:text-white uppercase tracking-tighter leading-none flex items-center gap-2">
@@ -131,12 +131,12 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
               </h2>
               <div className="flex items-baseline gap-1">
                 <span className="text-lg font-black uppercase text-green-600 dark:text-green-400">Ahorrás:</span>
-                <div className="text-lg font-black text-green-600 dark:text-green-400 tracking-tighter font-mono">${format(Math.round(potentialSavings))}</div>
+                <div className="text-lg font-black uppercase text-green-600 dark:text-green-400">${format(Math.round(potentialSavings))}</div>
               </div>
             </div>
 
             <div className="border-t border-neutral-100 dark:border-neutral-800 pt-2 w-full mt-2">
-              <span className="text-[10px] font-black uppercase text-neutral-500 tracking-[0.15em] block mb-1">Total Estimado:*</span>
+              <span className="text-[10px] font-black uppercase text-neutral-400 tracking-[0.15em] block mb-1">Total Estimado:*</span>
               <div className="text-4xl font-black text-black dark:text-white tracking-tighter font-mono leading-none">
                 ${format(Math.round(best.totalChango))}
               </div>
@@ -144,11 +144,11 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
           </div>
 
           <div className="bg-neutral-50 dark:bg-neutral-900 rounded-xl p-3 space-y-1.5">
-            <div className="flex justify-between items-center text-[12px] font-bold uppercase tracking-tight">
+            <div className="flex justify-between items-center text-[14px] font-bold uppercase tracking-tight">
               <span className="text-black dark:text-white">Subtotal:</span>
               <span className="text-black dark:text-white font-mono">${format(Math.round(best.subtotal))}</span>
             </div>
-            <div className="flex justify-between items-center text-[12px] font-bold uppercase tracking-tight">
+            <div className="flex justify-between items-center text-[14px] font-bold uppercase tracking-tight">
               <span className="text-black dark:text-white">Descuentos:</span>
               <span className="text-green-500 font-mono">-$ {format(Math.round(best.gondolaDiscount))}</span>
             </div>
@@ -182,8 +182,8 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
                 </a>
               )}
             </div>
-            <p className="text-[8px] text-black dark:text-white text-center pt-2">
-              *Valores estimados. La aplicación de beneficios y el precio final en caja dependen exclusivamente de las condiciones vigentes de cada comercio y entidad emisora.
+            <p className="text-[9px] text-black dark:text-white text-center pt-2">
+              *Valor estimado. La aplicación de beneficios y el precio final en caja dependen exclusivamente de las condiciones vigentes de cada comercio y entidad emisora.
             </p>
           </div>
 
@@ -194,7 +194,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
         <div className="px-1">
           <button 
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full flex items-center justify-between text-xs text-black dark:text-white uppercase tracking-tight py-1.5"
+            className="w-full flex items-center justify-between text-[12px] font-black text-black dark:text-white uppercase tracking-tight py-1.5"
           >
             <span>Otros mercados ({others.length})</span>
             <i className={`fa-solid fa-chevron-${isExpanded ? 'up' : 'down'} transition-transform text-xs`}></i>
@@ -204,10 +204,10 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
             <div className="mt-1 space-y-1 animate-in slide-in-from-top-1 duration-300">
               {others.map((store) => (
                 <div key={store.name} className="flex justify-between items-center py-2 px-4 bg-neutral-50/50 dark:bg-neutral-900/50 rounded-lg border border-neutral-100 dark:border-neutral-800">
-                  <span className="text-[10px] font-black text-neutral-600 dark:text-neutral-400 uppercase">{store.name}</span>
+                  <span className="text-[11px] font-black text-neutral-600 dark:text-neutral-400 uppercase">{store.name}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-bold text-red-500 font-mono">+${format(Math.round(store.totalChango - best.totalChango))}</span>
-                    <span className="font-mono text-[12px] font-black text-black dark:text-white">${format(Math.round(store.totalChango))}</span>
+                    <span className="text-[12px] font-bold text-red-500 font-mono">+${format(Math.round(store.totalChango - best.totalChango))}</span>
+                    <span className="font-mono text-[14px] font-black text-black dark:text-white">${format(Math.round(store.totalChango))}</span>
                   </div>
                 </div>
               ))}
@@ -219,7 +219,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
       <div className="px-1 mt-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <h4 className="text-xs text-black dark:text-white uppercase tracking-tight">
+            <h4 className="text-[13px] font-black text-black dark:text-white uppercase tracking-tight">
               Mis Listas
             </h4>
             {canSave && !showSaveInput && (
@@ -256,8 +256,8 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items, favorites, benefits, u
         )}
         <div className="mt-2 flex flex-wrap gap-2">
           {savedCarts.map((cart, index) => (
-            <div key={index} className="flex justify-between items-center p-2 bg-neutral-50 dark:bg-neutral-900 rounded-lg">
-              <button onClick={() => onLoadCart(index)} className="text-sm font-bold">{cart.name}</button>
+            <div key={index} className={`flex justify-between items-center p-2 rounded-lg transition-all ${activeListId === cart.id ? 'bg-green-500/10' : 'bg-neutral-50 dark:bg-neutral-900'}`}>
+              <button onClick={() => onLoadCart(cart)} className="text-[11px] font-black uppercase">{cart.titulo}</button>
               <button
                 onClick={() => onDeleteCart(cart.id)}
                 className="ml-2 text-red-500"

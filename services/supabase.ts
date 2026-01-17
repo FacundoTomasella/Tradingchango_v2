@@ -1,14 +1,12 @@
-
 import { createClient } from '@supabase/supabase-js';
-import { Product, PriceHistory, Profile, Benefit, UserMembership } from '../types';
+import { Product, PriceHistory, Profile, Benefit, UserMembership, SavedCart } from '../types';
 
-const getEnvVar = (name: string): string => {
-  try {
-    // @ts-ignore
-    return import.meta.env[name] || '';
-  } catch (e) {
-    return '';
+const getEnvVar = (key: string) => {
+  const value = import.meta.env[key];
+  if (value === undefined) {
+    console.warn(`Environment variable ${key} is not defined`);
   }
+  return value;
 };
 
 const SUPABASE_URL = getEnvVar('VITE_SUPABASE_URL');
@@ -16,8 +14,9 @@ const SUPABASE_KEY = getEnvVar('VITE_SUPABASE_ANON_KEY');
 
 const isValidUrl = (url: string) => {
   try {
-    return url && (url.startsWith('http://') || url.startsWith('https://'));
-  } catch {
+    new URL(url);
+    return true;
+  } catch (_) {
     return false;
   }
 };
@@ -30,21 +29,29 @@ export const supabase = createClient(
 export const getProducts = async (): Promise<Product[]> => {
   const { data, error } = await supabase.from('productos').select('*');
   if (error) throw error;
-  return data || [];
+  return data;
 };
 
-export const getPriceHistory = async (days: number = 7): Promise<PriceHistory[]> => {
-  const date = new Date();
-  date.setDate(date.getDate() - days);
+export const getProductHistory = async (productId: number): Promise<PriceHistory[]> => {
   const { data, error } = await supabase
     .from('historial_precios')
     .select('*')
-    .gte('fecha', date.toISOString().split('T')[0]);
+    .eq('producto_id', productId)
+    .order('fecha', { ascending: true });
   if (error) throw error;
+  return data;
+};
+
+export const getPriceHistory = async (days: number = 7): Promise<PriceHistory[]> => {
+  const { data, error } = await supabase.rpc('get_price_history_last_n_days', { days });
+  if (error) {
+    console.error('Error fetching price history:', error);
+    return [];
+  };
   return data || [];
 };
 
-export const getProductHistory = async (productName: string, days: number = 30): Promise<PriceHistory[]> => {
+export const getProductHistoryByName = async (productName: string, days: number = 30): Promise<PriceHistory[]> => {
   const date = new Date();
   date.setDate(date.getDate() - days);
   const { data, error } = await supabase
@@ -53,26 +60,39 @@ export const getProductHistory = async (productName: string, days: number = 30):
     .eq('nombre_producto', productName)
     .gte('fecha', date.toISOString().split('T')[0])
     .order('fecha', { ascending: true });
-  if (error) throw error;
-  return data || [];
-};
-
-export const getBenefits = async (dayOfWeek: number): Promise<Benefit[]> => {
-  const { data, error } = await supabase
-    .from('beneficios_super')
-    .select('*')
-    .eq('dia_semana', dayOfWeek);
-  if (error) throw error;
+  if (error) {
+    console.error('Error fetching product history by name:', error);
+    return [];
+  }
   return data || [];
 };
 
 export const getProfile = async (userId: string): Promise<Profile | null> => {
-  const { data, error } = await supabase
-    .from('perfiles')
-    .select('*')
-    .eq('id', userId)
-    .single();
+  const { data, error } = await supabase.from('perfiles').select('*').eq('id', userId).single();
   if (error) return null;
+  return data;
+};
+
+export const getConfig = async (): Promise<Record<string, string>> => {
+  const { data, error } = await supabase.from('configuracion').select('*');
+  if (error) {
+    console.warn('Could not fetch config. Returning default empty object.', error.message);
+    return {};
+  }
+  const config: Record<string, string> = {};
+    data?.forEach((row: any) => { config[row.clave as keyof typeof config] = row.valor; });
+  return config;
+};
+
+export const getBenefits = async (day: number): Promise<Benefit[]> => {
+  const { data, error } = await supabase.rpc('get_benefits_for_day', { query_day: day });
+  if (error) throw error;
+  return data;
+};
+
+export const getCatalogoMembresias = async (): Promise<any[]> => {
+  const { data, error } = await supabase.from('catalogo_membresias').select('*');
+  if (error) throw error;
   return data;
 };
 
@@ -84,75 +104,27 @@ export const updateMemberships = async (userId: string, memberships: UserMembers
   if (error) throw error;
 };
 
-// Guardamos un objeto que contiene el carrito activo y los changos guardados (máximo 2)
-export const saveCartData = async (userId: string, data: { active: Record<number, number>, saved: any[] }) => {
-  const { error } = await supabase
-    .from('carritos_guardados')
-    .upsert({ 
-      user_id: userId, 
-      items: data, 
-      updated_at: new Date().toISOString() 
-    });
-  if (error) throw error;
-};
-
-export const getSavedCartData = async (userId: string): Promise<{ active: Record<number, number>, saved: any[] } | null> => {
+export const getSavedCarts = async (userId: string): Promise<SavedCart[]> => {
   const { data, error } = await supabase
     .from('carritos_guardados')
-    .select('items')
+    .select('*')
     .eq('user_id', userId)
-    .maybeSingle();
-  if (error) return null;
-  
-  // Si los datos no tienen la estructura nueva, los convertimos
-  const items = data?.items;
-  if (items && !items.active && !items.saved) {
-    return { active: items, saved: [] };
-  }
-  
-  return items || { active: {}, saved: [] };
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return data;
 };
 
-// Guarda un carrito individual
-export const saveCart = async (userId: string, name: string, items: Record<number, number>) => {
+export const saveCart = async (userId: string, titulo: string, items: Record<number, number>): Promise<SavedCart> => {
   const { data, error } = await supabase
     .from('carritos_guardados')
-    .insert({ 
-      user_id: userId, 
-      name,
-      items, 
-    })
+    .insert({ user_id: userId, titulo, items })
     .select()
     .single();
   if (error) throw error;
   return data;
 };
 
-// Obtiene todos los carritos guardados de un usuario
-export const getSavedCarts = async (userId: string) => {
-  const { data, error } = await supabase
-    .from('carritos_guardados')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-  if (error) throw error;
-  return data || [];
-};
-
-// Obtiene un carrito compartido por su ID
-export const getSharedCart = async (cartId: string) => {
-  const { data, error } = await supabase
-    .from('carritos_guardados')
-    .select('items, name')
-    .eq('id', cartId)
-    .eq('is_public', true)
-    .single();
-  if (error) throw error;
-  return data;
-};
-
-// Actualiza un carrito (para compartir, etc.)
-export const updateCart = async (cartId: string, updates: Record<string, any>) => {
+export const updateCart = async (cartId: string, updates: Partial<SavedCart>): Promise<SavedCart> => {
   const { data, error } = await supabase
     .from('carritos_guardados')
     .update(updates)
@@ -163,26 +135,21 @@ export const updateCart = async (cartId: string, updates: Record<string, any>) =
   return data;
 };
 
-// Elimina un carrito por su ID
 export const deleteCart = async (cartId: string) => {
-  const { error } = await supabase
+  const { error } = await supabase.from('carritos_guardados').delete().eq('id', cartId);
+  if (error) throw error;
+};
+
+export const getSharedCart = async (cartId: string): Promise<SavedCart | null> => {
+  const { data, error } = await supabase
     .from('carritos_guardados')
-    .delete()
-    .eq('id', cartId);
-  if (error) throw error;
-};
-
-
-export const getCatalogoMembresias = async () => {
-  const { data, error } = await supabase.from('catalogo_membresias').select('*');
-  if (error) throw error;
-  return data || [];
-};
-
-export const getConfig = async () => {
-  const { data, error } = await supabase.from('configuracion').select('*');
-  if (error) throw error;
-  const config: Record<string, string> = {};
-    data?.forEach((row: any) => { config[row.clave as keyof typeof config] = row.valor; });
-  return config;
+    .select('*')
+    .eq('id', cartId)
+    .eq('is_public', true)
+    .single();
+  if (error) {
+    console.error("Error fetching shared cart:", error);
+    return null;
+  }
+  return data;
 };

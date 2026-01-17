@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { TabType, Profile } from '../types';
 
@@ -88,24 +87,26 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      <div className="relative mb-3">
-        <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500"></i>
-        <input 
-          type="text" 
-          placeholder="BUSCAR PRODUCTO..." 
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg py-3 pl-12 pr-10 text-sm font-medium focus:outline-none transition-all text-black dark:text-white placeholder:text-neutral-500"
-        />
-        {searchTerm && (
-          <button 
-            onClick={() => setSearchTerm('')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-black dark:hover:text-white transition-colors w-6 h-6 flex items-center justify-center"
-          >
-            <i className="fa-solid fa-xmark text-lg"></i>
-          </button>
-        )}
-      </div>
+      {!['about', 'terms', 'contact'].includes(currentTab) && (
+        <div className="relative mb-3">
+          <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500"></i>
+          <input 
+            type="text" 
+            placeholder="BUSCAR PRODUCTO..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg py-3 pl-12 pr-10 text-sm font-medium focus:outline-none transition-all text-black dark:text-white placeholder:text-neutral-500"
+          />
+          {searchTerm && (
+            <button 
+              onClick={() => setSearchTerm('')}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-black dark:hover:text-white transition-colors w-6 h-6 flex items-center justify-center"
+            >
+              <i className="fa-solid fa-xmark text-lg"></i>
+            </button>
+          )}
+        </div>
+      )}
 
       {!['favs', 'about', 'terms', 'contact'].includes(currentTab) && (
         <div className="flex gap-2">

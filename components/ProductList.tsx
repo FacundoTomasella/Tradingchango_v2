@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Product } from '../types';
 
@@ -24,6 +23,7 @@ interface ProductListProps {
   searchTerm?: string;
   purchasedItems?: Set<number>;
   onTogglePurchased?: (id: number) => void;
+  onNewList?: () => void;
 }
 
 const ProductList: React.FC<ProductListProps> = ({ 
@@ -80,7 +80,7 @@ const ProductList: React.FC<ProductListProps> = ({
   }
 
   return (
-    <div className="divide-neutral-100 dark:divide-neutral-900 border-neutral-100 dark:divide-neutral-900">
+    <div className="divide-y divide-neutral-100 dark:divide-neutral-900 border-b border-neutral-100 dark:border-neutral-900">
       {products.map((p) => {
         const fav = isFavorite(p.id);
         const purchased = purchasedItems?.has(p.id);
@@ -110,7 +110,7 @@ const ProductList: React.FC<ProductListProps> = ({
             <div className="flex-1 flex items-center justify-between pr-2 min-w-0 ml-3">
               <div className="flex flex-col gap-0 min-w-0">
                 <div className="flex items-center flex-wrap gap-1">
-                  <span className={`font-[800] text-black dark:text-white text-[16px] tracking-tight uppercase font-mono leading-none ${purchased ? 'line-through' : ''}`}>
+                  <span className={`font-[800] text-black dark:text-white text-[14px] tracking-tight uppercase font-mono leading-none ${purchased ? 'line-through' : ''}`}>
                     {p.ticker || p.nombre.substring(0, 5).toUpperCase()}
                   </span>
                   {badges && !purchased && badges.map((b, idx) => (
@@ -119,13 +119,13 @@ const ProductList: React.FC<ProductListProps> = ({
                     </span>
                   ))}
                 </div>
-                <span className={`text-[16px] font-medium text-neutral-700 dark:text-neutral-400 line-clamp-1 font-sans mt-0.5 ${purchased ? 'line-through' : ''}`}>
+                <span className={`text-[14px] font-medium text-neutral-700 dark:text-neutral-400 line-clamp-1 font-sans mt-0.5 ${purchased ? 'line-through' : ''}`}>
                   {p.nombre}
                 </span>
               </div>
 
               <div className="text-right flex flex-col items-end min-w-[80px]">
-                <span className="font-mono font-[800] text-black dark:text-white text-[17px] leading-none">
+                <span className="font-mono font-[800] text-black dark:text-white text-[14px] leading-none">
                   ${format(p.stats.min)}
                 </span>
                 <span 
@@ -158,7 +158,7 @@ const ProductList: React.FC<ProductListProps> = ({
                   className={`transition-all flex items-center justify-center active:scale-90 p-1.5 ${fav ? 'text-star-gold' : 'text-neutral-300 dark:text-neutral-800'}`}
                   style={{ transform: 'scale(0.95)' }}
                 >
-                  <i className="fa-solid fa-cart-shopping text-[22px]"></i>
+                  <i className="fa-solid fa-cart-shopping text-[20px]"></i>
                 </button>
               )}
             </div>

@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { getProductHistory } from '../services/supabase';
+import { getProductHistoryByName } from '../services/supabase';
 import { Product, PriceHistory } from '../types';
 
 interface ProductDetailProps {
@@ -22,7 +21,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
 
   useEffect(() => {
     if (product) {
-      getProductHistory(product.nombre, 365)
+      getProductHistoryByName(product.nombre, 365)
         .then(data => setHistory(data || []))
         .catch(() => setHistory([]));
     }
@@ -78,32 +77,35 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
     return storeData ? (product as any)[storeData.url] || '#' : '#';
   }, [product, minStore]);
 
-  const { chartData, percentageChange, isTrendUp } = useMemo(() => {
-    if (!history.length) return { chartData: [], percentageChange: 0, isTrendUp: false };
+  const getChartData = (history: PriceHistory[], days: number) => {
     const limitDate = new Date();
+    limitDate.setHours(0, 0, 0, 0);
     limitDate.setDate(limitDate.getDate() - days);
     
     const filtered = history
-      .filter(h => new Date(h.fecha) >= limitDate)
-      .map(h => ({
-        date: new Date(h.fecha).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' }),
-        fullDate: new Date(h.fecha).toLocaleDateString('es-AR', { day: 'numeric', month: 'long' }),
-        price: h.precio_minimo,
-        store: h.supermercado
-      }));
+      .filter(h => new Date(h.fecha + 'T00:00:00') >= limitDate)
+      .map(h => {
+        const date = new Date(h.fecha + 'T00:00:00');
+        return {
+          date: date.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' }),
+          fullDate: date.toLocaleDateString('es-AR', { day: 'numeric', month: 'long' }),
+          price: h.precio_minimo,
+          store: h.supermercado
+        };
+      });
+      return filtered;
+  };
 
-    if (filtered.length < 2) return { chartData: filtered, percentageChange: 0, isTrendUp: false };
+  const chartData = useMemo(() => getChartData(history, days), [history, days]);
 
-    const firstPrice = filtered[0].price;
-    const lastPrice = filtered[filtered.length - 1].price;
+  const { percentageChange, isTrendUp } = useMemo(() => {
+    if (chartData.length < 2) return { percentageChange: 0, isTrendUp: false };
+    const firstPrice = chartData[0].price;
+    const lastPrice = chartData[chartData.length - 1].price;
     const change = ((lastPrice - firstPrice) / firstPrice) * 100;
+    return { percentageChange: change, isTrendUp: change > 0 };
+  }, [chartData]);
 
-    return { 
-      chartData: filtered, 
-      percentageChange: change, 
-      isTrendUp: change > 0 
-    };
-  }, [history, days]);
 
   if (!product) return null;
   const format = (n: number) => new Intl.NumberFormat('es-AR').format(n);
@@ -115,7 +117,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm md:p-4">
       <div 
         ref={modalRef}
-        className="w-full max-w-lg h-full md:h-auto md:max-h-[95vh] bg-white dark:bg-neutral-950 md:rounded-[1.2rem] overflow-y-auto no-scrollbar shadow-2xl relative"
+        className="w-full max-w-lg h-full md:h-auto md:max-h-[95vh] bg-white dark:bg-neutral-950 md:rounded-[1.2rem] overflow-y-auto shadow-2xl relative"
       >
         <div className="sticky top-0 z-20 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-md px-4 py-2 flex items-center justify-between border-b border-neutral-100 dark:border-neutral-900">
           <button onClick={onClose} className="text-black dark:text-white p-2">
@@ -139,7 +141,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
             </div>
             
             <div className="flex flex-col flex-1">
-              <h1 className="text-lg md:text-2xl font-black text-black dark:text-white leading-tight mb-1 tracking-tighter">
+              <h1 className="text-2xl md:text-3xl font-black text-black dark:text-white leading-tight mb-1 tracking-tighter">
                 {product.nombre}
               </h1>
               
@@ -155,7 +157,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
                 <div className="flex items-end gap-2">
                   <div className="flex items-baseline gap-0.5">
                     <span className="text-base font-bold text-black dark:text-white">$</span>
-                    <span className="text-3xl md:text-5xl font-black text-black dark:text-white tracking-tighter font-mono leading-none">
+                    <span className="text-3xl md:text-4xl font-black text-black dark:text-white tracking-tighter font-mono leading-none">
                       {format(minPrice)}
                     </span>
                   </div>
@@ -250,7 +252,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onClose, onFav
 
           <div className="w-full border border-neutral-100 dark:border-neutral-800 rounded-lg overflow-hidden mb-4">
             <div className="w-full flex items-center justify-between p-2.5 bg-neutral-50 dark:bg-neutral-900/50">
-              <span className="text-[10px] font-black uppercase tracking-[0.1em] text-black dark:text-white">Comparativa por Mercado</span>
+              <span className="text-[11px] font-black uppercase tracking-[0.1em] text-black dark:text-white">Comparativa por Mercado</span>
             </div>
             <div className="px-3 py-2 space-y-2 bg-white dark:bg-neutral-950">
               {STORES.map((s) => {

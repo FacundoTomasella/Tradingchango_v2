@@ -1,4 +1,3 @@
-
 export interface Product {
   id: number;
   nombre: string;
@@ -9,19 +8,14 @@ export interface Product {
   p_dia: number;
   p_jumbo: number;
   p_masonline: number;
-  url_coto?: string;
-  url_carrefour?: string;
-  url_dia?: string;
-  url_jumbo?: string;
-  url_masonline?: string;
-  imagen_url?: string;
-  oferta_gondola?: any;
+  imagen_url?: string; // Agregado
+  oferta_gondola?: any; // Agregado
 }
 
 export interface PriceHistory {
   id: number;
   fecha: string;
-  nombre_producto: string;
+  nombre_producto: string; // Asegurado
   precio_minimo: number;
   supermercado: string;
 }
@@ -31,28 +25,32 @@ export interface Membership {
   nombre: string;
   categoria: string;
   logo_url: string;
-  opciones: string[];
+  opciones?: string[]; // Agregado
 }
 
 export interface UserMembership {
   slug: string;
-  tipo: string;
+  tipo: string; // Cambiado de literal a string para evitar errores
 }
 
 export interface Profile {
   id: string;
   email: string;
-  nombre?: string;
+  nombre?: string; // Agregado
   apellido?: string;
-  fecha_nacimiento?: string;
   subscription: 'free' | 'pro' | 'premium';
-  created_at: string;
-  membresias: UserMembership[];
   subscription_end?: string | null;
-  last_cart?: any;
+  membresias: UserMembership[];
 }
 
-export interface Benefit {
+export interface SavedCart {
+  id: string;
+  name: string; // Agregado
+  items: Record<number, number>;
+  created_at: string;
+}
+
+export interface Benefit {  // <--- REVISA ESTA PALABRA
   id: number;
   dia_semana: number;
   supermercado: string;
@@ -61,9 +59,7 @@ export interface Benefit {
   link_referido?: string;
 }
 
-export type TabType = 'home' | 'carnes' | 'verdu' | 'varios' | 'favs' | 'about' | 'terms' | 'contact';
-
-export interface ProductStats {
+export interface ProductStats { // <--- REVISA ESTA PALABRA
   min: number;
   spread: string;
   trendClass: string;
@@ -71,3 +67,7 @@ export interface ProductStats {
   isUp: boolean;
   isDown: boolean;
 }
+
+
+
+export type TabType = 'home' | 'carnes' | 'verdu' | 'varios' | 'favs' | 'about' | 'terms' | 'contact';

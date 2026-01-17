@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { supabase, getCatalogoMembresias, updateMemberships } from '../services/supabase';
 import { Profile, Membership, UserMembership } from '../types';
@@ -12,15 +11,17 @@ interface AuthModalProps {
   onProfileUpdate?: () => void;
   savedCarts?: any[];
   onSaveCart?: (name: string) => void;
-  onDeleteCart?: (index: number) => void;
-  onLoadCart?: (index: number) => void;
+  onDeleteCart?: (id: string) => void;
+  onLoadCart?: (cart: any) => void;
   currentActiveCartSize: number;
+  action?: string | null;
+  message?: string | null;
 }
 
 const AuthModal: React.FC<AuthModalProps> = ({ 
   isOpen, onClose, user, profile, onSignOut, onProfileUpdate, 
   savedCarts = [], onSaveCart, onDeleteCart, onLoadCart,
-  currentActiveCartSize
+  currentActiveCartSize, action, message
 }) => {
   const [view, setView] = useState<'main' | 'mis_changos' | 'membresias' | 'profile' | 'welcome' | 'form'>('main');
   const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -55,12 +56,23 @@ const AuthModal: React.FC<AuthModalProps> = ({
   }, [onClose]);
 
   useEffect(() => {
-    if (user) setView('profile');
-    else {
-      setView('welcome');
-      setSuccess(null);
+    if (user) {
+      if (view === 'welcome' || view === 'form' || view === 'main') {
+        setView('profile');
+      }
+    } else { // user is null
+      if (action) {
+        setView('form');
+        setMode(action === 'login' ? 'login' : 'register');
+        if (message) {
+          setError(message);
+        }
+      } else {
+        setView('welcome');
+        setSuccess(null);
+      }
     }
-  }, [user]);
+  }, [user, action, message, view]);
 
   const toggleMembership = async (slug: string, tipo: string = 'standard') => {
     if (!user || !profile) return;
@@ -126,10 +138,10 @@ const AuthModal: React.FC<AuthModalProps> = ({
                 nombre,
                 apellido,
                 fecha_nacimiento: fechaNacimiento,
-                subscription: 'pro',           // Cambiado a 'pro' (en minúsculas por TypeScript)
-                subscription_end: '2027-01-01' // Agregamos la fecha de vencimiento
+                subscription: 'pro',
+                subscription_end: '2027-01-01'
           });
-}
+        }
         setSuccess(`¡Bienvenido ${nombre}! Tu cuenta está lista.`);
         setMode('login');
       } else {
@@ -239,10 +251,10 @@ const AuthModal: React.FC<AuthModalProps> = ({
                       <p className="text-[9px] text-neutral-400 font-bold uppercase">{Object.keys(cart.items).length} productos</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button onClick={() => { onLoadCart?.(idx); onClose(); }} className="w-8 h-8 rounded-lg bg-black dark:bg-white text-white dark:text-black flex items-center justify-center text-[11px] hover:scale-110 transition-transform">
+                      <button onClick={() => { onLoadCart?.(cart); onClose(); }} className="w-8 h-8 rounded-lg bg-black dark:bg-white text-white dark:text-black flex items-center justify-center text-[11px] hover:scale-110 transition-transform">
                         <i className="fa-solid fa-upload"></i>
                       </button>
-                      <button onClick={() => onDeleteCart?.(idx)} className="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center text-[11px] hover:scale-110 transition-transform">
+                      <button onClick={() => onDeleteCart?.(cart.id)} className="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center text-[11px] hover:scale-110 transition-transform">
                         <i className="fa-solid fa-trash-can"></i>
                       </button>
                     </div>
@@ -258,7 +270,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
           <div className="animate-in slide-in-from-right-4 duration-300">
             <h3 className="text-lg font-black dark:text-white mb-4 uppercase tracking-tighter">Mis Beneficios</h3>
             <div className="space-y-6">
-              {Object.entries(categorizedMembresias).map(([catName, items]) => items.length > 0 && (
+              {Object.entries(categorizedMembresias).map(([catName, items]) =>
                 <div key={catName}>
                   <h4 className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] mb-3 border-b border-neutral-100 dark:border-neutral-900 pb-1">{catName}</h4>
                   <div className="space-y-4">
@@ -295,7 +307,7 @@ const AuthModal: React.FC<AuthModalProps> = ({
                     ))}
                   </div>
                 </div>
-              ))}
+              )}
             </div>
             <button onClick={() => setView('profile')} className="w-full bg-black dark:bg-white dark:text-black text-white py-3.5 rounded-xl font-black mt-6 uppercase text-[10px] tracking-widest shadow-xl">Guardar Selección</button>
           </div>
