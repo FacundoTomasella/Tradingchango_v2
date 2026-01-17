@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TradingChango | Maximizá tu Carrito</title>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/username/repo/branch/logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['Roboto Mono', 'monospace'],
+            },
+            colors: {
+              primary: '#131722',
+              muted: '#787b86',
+              'muted-dark': '#888888',
+              'border-light': '#e0e3eb',
+              'border-dark': '#2a2a2a',
+              'trading-green': '#00a650',
+              'trading-red': '#f23645',
+              'star-gold': '#f2a900',
+              'chart-green': '#00c853',
+              'chart-red': '#ff3b30',
+              'bg-card-light': '#f9f9f9',
+              'bg-card-dark': '#121212'
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        :root {
+            --text-main: #131722;
+            --bg-app: #ffffff;
+        }
+        .dark {
+            --text-main: #ffffff;
+            --bg-app: #000000;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-size: 15px; /* Aumento de fuente base */
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+        
+        .logo-link {
+            text-decoration: none !important;
+            color: inherit;
+            cursor: pointer;
+        }
+        .logo {
+            font-weight: 800 !important;
+            font-size: 22px !important;
+            letter-spacing: -1px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            color: var(--text-main) !important;
+        }
+        .logo-icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 24px;
+            width: 30px;
+        }
+        .trend-icon-overlay {
+            font-size: 12px;
+            color: #00a650;
+            position: absolute;
+            top: -4px;
+            right: -2px;
+            background: var(--bg-app);
+            padding: 1px;
+            border-radius: 50%;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        @media (max-width: 768px) {
+          .chart-container {
+            height: 280px !important;
+          }
+        }
+    </style>
+
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.90.1",
+    "recharts": "https://esm.sh/recharts@^3.6.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+  }
+}
+</script>
+  <script type="module" crossorigin src="/assets/index-d0xywB87.js"></script>
+</head>
+<body class="bg-[#ffffff] dark:bg-[#000000] text-[#131722] dark:text-[#ffffff]">
+    <div id="root"></div>
+
+</body>
+</html>
