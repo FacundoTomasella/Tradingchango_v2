@@ -56,11 +56,17 @@ const AuthModal: React.FC<AuthModalProps> = ({
   }, [onClose]);
 
   useEffect(() => {
+    if (!isOpen) {
+      // Reset view when modal is closed
+      setView('main');
+      setError(null);
+      setSuccess(null);
+      return;
+    }
+
     if (user) {
-      if (view === 'welcome' || view === 'form' || view === 'main') {
-        setView('profile');
-      }
-    } else { // user is null
+      setView('profile');
+    } else {
       if (action) {
         setView('form');
         setMode(action === 'login' ? 'login' : 'register');
@@ -69,10 +75,9 @@ const AuthModal: React.FC<AuthModalProps> = ({
         }
       } else {
         setView('welcome');
-        setSuccess(null);
       }
     }
-  }, [user, action, message, view]);
+  }, [isOpen, user, action, message]);
 
   const toggleMembership = async (slug: string, tipo: string = 'standard') => {
     if (!user || !profile) return;
