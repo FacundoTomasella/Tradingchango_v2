@@ -81,7 +81,7 @@ const Header: React.FC<HeaderProps> = ({
           <button onClick={onUserClick} className="w-8 h-8 flex items-center justify-center text-black dark:text-white">
             <i className={`fa-solid fa-circle-user text-xl ${isPro ? 'text-green-600' : ''}`}></i>
           </button>
-          <button onClick={toggleTheme} className="text-black dark:text-white hover:opacity-70 transition-opacity">
+          <button onClick={toggleTheme} className="w-8 h-8 flex items-center justify-center text-black dark:text-white hover:opacity-70 transition-opacity relative top-px">
             <i className={`fa-solid ${theme === 'dark' ? 'fa-sun' : 'fa-moon'} text-xl`}></i>
           </button>
         </div>
